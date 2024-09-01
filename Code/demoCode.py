@@ -10,7 +10,7 @@ p.connect(p.GUI)
 p.setAdditionalSearchPath(pybullet_data.getDataPath())
 plane_id = p.loadURDF('plane.urdf')
 # Load the URDF file. Replace 'robot.urdf' with your URDF file's path
-robot_id = p.loadURDF(path+"Quadruped2.urdf")
+robot_id = p.loadURDF(path+"Quadruped.urdf")
 p.setGravity(0, 0, -9.81)
 # Get the number of joints in the loaded URDF
 num_joints = p.getNumJoints(robot_id)
@@ -39,12 +39,12 @@ while True:
         p.setJointMotorControl2(
             bodyUniqueId=robot_id,
             jointIndex=joint_index,
-            controlMode=p.VELOCITY_CONTROL,
-            targetPosition=100
+            controlMode=p.POSITION_CONTROL,
+            targetPosition=target_position
         )
     # Step the simulation
     p.stepSimulation()
-    print("")
+    #print("")
     # Optional sleep for real-time simulation
     time.sleep(1./240.)
 
