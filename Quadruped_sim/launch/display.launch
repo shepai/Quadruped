@@ -3,7 +3,7 @@
     name="model" />
   <param
     name="robot_description"
-    textfile="$(find Quadruped2)/urdf/Quadruped2.urdf" />
+    textfile="$(find Quadruped)/urdf/Quadruped.urdf" />
   <node
     name="joint_state_publisher_gui"
     pkg="joint_state_publisher_gui"
@@ -16,5 +16,5 @@
     name="rviz"
     pkg="rviz"
     type="rviz"
-    args="-d $(find Quadruped2)/urdf.rviz" />
+    args="-d $(find Quadruped)/urdf.rviz" />
 </launch>
