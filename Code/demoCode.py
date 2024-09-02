@@ -1,5 +1,5 @@
 path="C:/Users/dexte/Documents/GitHub/Quadruped/Quadruped_sim/urdf/"
-path="/its/home/drs25/Documents/GitHub/Quadruped/Quadruped_sim/urdf/"
+#path="/its/home/drs25/Documents/GitHub/Quadruped/Quadruped_sim/urdf/"
 import pybullet as p
 import pybullet_data
 import time
@@ -11,9 +11,11 @@ p.connect(p.GUI)
 p.setAdditionalSearchPath(pybullet_data.getDataPath())
 plane_id = p.loadURDF('plane.urdf')
 # Load the URDF file. Replace 'robot.urdf' with your URDF file's path
-robot_id = p.loadURDF(path+"Quadruped.urdf")
+flags = p.URDF_USE_SELF_COLLISION
+robot_id = p.loadURDF(path+"Quadruped.urdf",flags=flags)
 p.setGravity(0, 0, -9.81)
 # Get the number of joints in the loaded URDF
+
 num_joints = p.getNumJoints(robot_id)
 
 # Iterate through each joint and print some information
