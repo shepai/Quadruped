@@ -9,7 +9,6 @@ class Quadruped:
         self.start=self.getPos()
     def reset(self):
         for joint_index in range(12): 
-            joint_info = self.p.getJointInfo(self.robot_id, joint_index)
             self.p.setJointMotorControl2(
                 bodyUniqueId=self.robot_id,
                 jointIndex=joint_index,
@@ -19,7 +18,6 @@ class Quadruped:
     def setPositions(self,positions): #positions in degrees
         for i in range(len(positions)):
            self.motors[i]=positions[i]
-           joint_info = self.p.getJointInfo(self.robot_id, i)
            self.p.setJointMotorControl2(
                 bodyUniqueId=self.robot_id,
                 jointIndex=i,
