@@ -1,4 +1,5 @@
 path="C:/Users/dexte/Documents/GitHub/Quadruped/Quadruped_sim/urdf/"
+path="/its/home/drs25/Documents/GitHub/Quadruped/Quadruped_sim/urdf/"
 import pybullet as p
 import pybullet_data
 import time
@@ -26,13 +27,13 @@ while True:
         # Get the joint's range of motion
         joint_info = p.getJointInfo(robot_id, joint_index)
         lower_limit = 0
-        upper_limit = 180
+        upper_limit = 50
 
         # Set the joint position to a specific value within the range
         target_position = (lower_limit + upper_limit) / 2.0  # Midpoint for simplicity
         
         # Use a sinusoidal motion for continuous movement
-        target_position = lower_limit + (upper_limit - lower_limit) * (0.5 * (1 + maths.sin(time.time())))
+        target_position = lower_limit + (upper_limit - lower_limit) * (0.01 * (1 + maths.sin(time.time())))
         #print(target_position,end=",")
         #print(upper_limit,lower_limit)
         # Move the joint to the target position
