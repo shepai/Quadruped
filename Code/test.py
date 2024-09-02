@@ -10,7 +10,8 @@ import Quadruped
 p.connect(p.GUI)
 p.setAdditionalSearchPath(pybullet_data.getDataPath())
 plane_id = p.loadURDF('plane.urdf')
-robot_id = p.loadURDF(path+"Quadruped.urdf")
+flags = p.URDF_USE_SELF_COLLISION
+robot_id = p.loadURDF(path+"Quadruped.urdf",flags=flags)
 p.setGravity(0, 0, -9.81)
 
 quad=Quadruped.Quadruped(p,robot_id)

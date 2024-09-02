@@ -1,5 +1,5 @@
 path="C:/Users/dexte/Documents/GitHub/Quadruped/Quadruped_sim/urdf/"
-path="/its/home/drs25/Documents/GitHub/Quadruped/Quadruped_sim/urdf/"
+#path="/its/home/drs25/Documents/GitHub/Quadruped/Quadruped_sim/urdf/"
 import pybullet as p
 import pybullet_data
 import time
@@ -24,8 +24,8 @@ def runTrial(agent,generations,delay=True):
     plane_id = p.loadURDF('plane.urdf')
     initial_position = [0, 0, 0.2]  # x=1, y=2, z=0.5
     initial_orientation = p.getQuaternionFromEuler([0, 0, 0])  # No rotation (Euler angles to quaternion)
-
-    robot_id = p.loadURDF(path+"Quadruped.urdf", initial_position, initial_orientation)
+    flags = p.URDF_USE_SELF_COLLISION
+    robot_id = p.loadURDF(path+"Quadruped.urdf", initial_position, initial_orientation,flags=flags)
     for i in range(100):
         p.stepSimulation()
         p.setTimeStep(1./24.)
