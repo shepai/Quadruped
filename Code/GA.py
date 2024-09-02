@@ -10,7 +10,7 @@ import numpy as np
 # Initialize the PyBullet physics engine
 p.connect(p.GUI)
 p.setAdditionalSearchPath(pybullet_data.getDataPath())
-
+print(pybullet_data.getDataPath())
 p.setGravity(0, 0, -9.81)
 def fitness(robot):
     x,y,z=robot.getPos()
@@ -77,8 +77,7 @@ for gen in range(generations):
     #if gen%10==0:
         #runTrial(population[np.where(fitnesses==np.max(fitnesses))[0][0]],150)
 #play the trials on reapeat
-while True:
-    for u in range(len(fitnesses)):
-        runTrial(population[u],100)
+np.save("genotypes",population)
+np.save("fitnesses",fitnesses)
 
 p.disconnect()
