@@ -19,11 +19,12 @@ class Quadruped:
     def setPositions(self,positions): #positions in degrees
         for i in range(len(positions)):
            self.motors[i]=positions[i]
+           joint_info = self.p.getJointInfo(self.robot_id, i)
            self.p.setJointMotorControl2(
                 bodyUniqueId=self.robot_id,
                 jointIndex=i,
                 controlMode=self.p.POSITION_CONTROL,
-                targetPosition=maths.radians(maths.radians(self.motors[i]))
+                targetPosition=maths.radians(self.motors[i])
             ) 
     def getPos(self):
         position, orientation = self.p.getBasePositionAndOrientation(self.robot_id)
