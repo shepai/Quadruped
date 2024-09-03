@@ -51,3 +51,9 @@ class Quadruped:
             if feet.get(p[3],"wrong")!="wrong": # only gather feet
                 feet[p[3]]=p[9] # gather force
         return [feet[2],feet[5],feet[8],feet[11]]
+    def hasFallen(self):
+        points=self.getContact()
+        for p in points:
+            if p[3] in [0]:
+                return True
+        return False
