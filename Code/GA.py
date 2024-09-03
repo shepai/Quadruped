@@ -6,11 +6,11 @@ import time
 import math as maths
 import Quadruped
 import numpy as np
+import os
 
 # Initialize the PyBullet physics engine
-p.connect(p.GUI)
+p.connect(p.DIRECT)
 p.setAdditionalSearchPath(pybullet_data.getDataPath())
-print(pybullet_data.getDataPath())
 p.setGravity(0, 0, -9.81)
 
 def euclidean_distance(point1, point2):
@@ -26,6 +26,7 @@ def runTrial(agent,generations,delay=True):
     p.resetSimulation()
     p.setGravity(0, 0, -9.81)
     plane_id = p.loadURDF('plane.urdf')
+    p.configureDebugVisualizer(p.COV_ENABLE_GUI,0)
     initial_position = [0, 0, 0.3]  # x=1, y=2, z=0.5
     initial_orientation = p.getQuaternionFromEuler([0, 0, 0])  # No rotation (Euler angles to quaternion)
     flags = p.URDF_USE_SELF_COLLISION
@@ -56,9 +57,9 @@ def mutate(array,probability=0.2):
     return array
 
 #initial
-population=mutate(np.zeros((150,15,12)),probability=0.4)#np.random.choice([50, 20, 0,0,0,0,-20],(150,15,12)) #12 motors, 15 steps
-fitnesses=np.zeros((150,))
-generations=2000
+population=mutate(np.zeros((50,15,12)),probability=0.4)#np.random.choice([50, 20, 0,0,0,0,-20],(150,15,12)) #12 motors, 15 steps
+fitnesses=np.zeros((50,))
+generations=1000
 
 #get fitnesses
 for i in range(len(fitnesses)):
@@ -66,10 +67,12 @@ for i in range(len(fitnesses)):
     print(i,"/",len(fitnesses), fitnesses[i])
 
 for gen in range(generations):
-    print("Generation ",gen+1)
+    clear = lambda: os.system('clear')
+    print("Generation ",gen+1,"Best fitness",np.max(fitnesses))
     ind1=np.random.randint(0,len(fitnesses)-1)
     ind2=np.random.randint(0,len(fitnesses)-1)
     geno=population[ind1].copy()
+    print(geno)
     f=runTrial(geno,100,delay=False) #run trial
     if f>fitnesses[ind2]: #selection
         mutated=mutate(geno)
@@ -85,4 +88,7 @@ for gen in range(generations):
 np.save("genotypes",population)
 np.save("fitnesses",fitnesses)
 
+p.disconnect()
+p.connect(p.GUI)
+runTrial(population[np.where(fitnesses==np.max(fitnesses))[0][0]],150)
 p.disconnect()
