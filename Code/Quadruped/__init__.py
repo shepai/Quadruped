@@ -1,13 +1,14 @@
 import math as maths
 
 class Quadruped:
-    def __init__(self,p,robot_id):
+    def __init__(self,p,robot_id,floor=None):
         self.robot_id =robot_id  #connect to simulation
         self.p=p
         self.motors=[0 for i in range(3*4)] #positions in degrees
         self.neutral=[0 for i in range(3*4)] #positions in degrees
         self.start=self.getPos()
         self.start_orientation=self.getOrientation()
+        self.floor=floor
     def reset(self):
         for joint_index in range(12): 
             self.p.setJointMotorControl2(
@@ -38,3 +39,15 @@ class Quadruped:
         # Get all contact points where the robot is in contact with itself
         contact_points = self.p.getContactPoints(bodyA=self.robot_id, bodyB=self.robot_id)
         return len(contact_points)
+    def getContact(self):
+        if type(self.floor)==type(None):
+            raise TypeError("No floor ")
+        contact_points = self.p.getContactPoints(bodyA=self.robot_id, bodyB=self.floor)
+        return contact_points
+    def getFeet(self):
+        feet={8:0,11:0,5:0,2:0}
+        points=self.getContact()
+        for p in points:
+            if feet.get(p[3],"wrong")!="wrong": # only gather feet
+                feet[p[3]]=p[9] # gather force
+        return [feet[2],feet[5],feet[8],feet[11]]
