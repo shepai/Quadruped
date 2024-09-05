@@ -11,7 +11,7 @@ from stable_baselines3 import PPO
 import time
 def euclidean_distance(point1, point2):
     return np.sqrt(np.sum((np.array(point1) - np.array(point2)) ** 2))
-
+t1=time.time()
 class GYM(gym.Env):
     metadata = {"render_modes": ["human"], "render_fps": 30}
     def __init__(self,sim,view=True):
@@ -85,34 +85,6 @@ class GYM(gym.Env):
     def render(self, mode='human'):
         pass
 
-class CustomEnv(gym.Env):
-    def __init__(self):
-        super(CustomEnv, self).__init__()
-        # Define action and observation space
-        # For example, using Box space for continuous actions
-        self.action_space = spaces.Box(low=-1, high=1, shape=(1,), dtype=np.float32)
-        # Define observation space
-        self.observation_space = spaces.Box(low=0, high=100, shape=(1,), dtype=np.float32)
-
-    def reset(self):
-        # Reset the environment to an initial state
-        return self.observation_space.sample()  # Example
-
-    def step(self, action):
-        # Implement how the environment reacts to an action
-        observation = self.observation_space.sample()  # Example
-        reward = 0.0  # Example reward
-        done = False  # Example condition for episode termination
-        info = {}  # Extra info (optional)
-        return observation, reward, done, info
-
-    def render(self, mode='human'):
-        # Render the environment (optional)
-        pass
-
-    def close(self):
-        # Cleanup (optional)
-        pass
 # Initialize the PyBullet physics engine
 p.connect(p.DIRECT) #
 p.setAdditionalSearchPath(pybullet_data.getDataPath())
@@ -124,19 +96,21 @@ env=GYM(p)
 model = PPO("MlpPolicy", env, verbose=1, tensorboard_log="./ppo_quadruped_tensorboard/")
 
 # Train the model
-model.learn(total_timesteps=1000000)  # Adjust the number of timesteps as needed
+model.learn(total_timesteps=1)  # Adjust the number of timesteps as needed
 
 # Save the model
-model.save("ppo_quadruped_model")
+model.save("ppo_quadruped_model.zip")
 p.disconnect()
 p.connect(p.GUI) #DIRECT
 p.setAdditionalSearchPath(pybullet_data.getDataPath())
 env=GYM(p)
 # Test the trained model
 obs = env.reset()
-for _ in range(1000):
+for _ in range(2):
     action, _states = model.predict(obs)
     obs, rewards, done, info = env.step(action)
     env.render()
     if done:
         obs = env.reset()
+
+print("*********************************\n\n\nTIME TAKEN",(time.time()-t1) /(60*60))
