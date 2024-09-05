@@ -93,10 +93,10 @@ env=GYM(p)
 #check_env(env)
 
 # Initialize PPO model
-model = PPO("MlpPolicy", env, verbose=1, tensorboard_log="./ppo_quadruped_tensorboard/")
+model = PPO("MlpPolicy", env, verbose=1, tensorboard_log="./ppo_quadruped_tensorboard/",device="cuda")
 
 # Train the model
-model.learn(total_timesteps=1)  # Adjust the number of timesteps as needed
+model.learn(total_timesteps=100000)  # Adjust the number of timesteps as needed
 
 # Save the model
 model.save("ppo_quadruped_model.zip")
@@ -106,7 +106,7 @@ p.setAdditionalSearchPath(pybullet_data.getDataPath())
 env=GYM(p)
 # Test the trained model
 obs = env.reset()
-for _ in range(2):
+for _ in range(1000):
     action, _states = model.predict(obs)
     obs, rewards, done, info = env.step(action)
     env.render()
