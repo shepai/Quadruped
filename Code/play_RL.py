@@ -94,7 +94,7 @@ p.setAdditionalSearchPath(pybullet_data.getDataPath())
 env = GYM(p)
 
 # Load the previously saved model
-model = PPO.load("/its/home/drs25/Documents/GitHub/Quadruped/ppo_quadruped_model_test.zip")
+model = PPO.load("/its/home/drs25/Documents/GitHub/Quadruped/ppo_quadruped_model.zip")
 
 # Reset the environment
 obs = env.reset()

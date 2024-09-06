@@ -99,7 +99,7 @@ model = PPO("MlpPolicy", env, verbose=1, tensorboard_log="./ppo_quadruped_tensor
 model.learn(total_timesteps=100000)  # Adjust the number of timesteps as needed
 
 # Save the model
-model.save("ppo_quadruped_model.zip")
+model.save("/its/home/drs25/Documents/GitHub/Quadruped/ppo_quadruped_model.zip")
 p.disconnect()
 p.connect(p.GUI) #DIRECT
 p.setAdditionalSearchPath(pybullet_data.getDataPath())
