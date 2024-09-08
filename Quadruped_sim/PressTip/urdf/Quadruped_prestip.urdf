@@ -1,0 +1,743 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- This URDF was automatically created by SolidWorks to URDF Exporter! Originally created by Stephen Brawner (brawner@gmail.com) 
+     Commit Version: 1.6.0-4-g7f85cfe  Build Version: 1.6.7995.38578
+     For more information, please see http://wiki.ros.org/sw_urdf_exporter -->
+<robot
+  name="Quadruped_prestip">
+  <link
+    name="base_link">
+    <inertial>
+      <origin
+        xyz="0.00952304123874648 -0.0385000000079273 0.0139434636099319"
+        rpy="0 0 0" />
+      <mass
+        value="0.267600954152043" />
+      <inertia
+        ixx="9.27694549502905E-05"
+        ixy="7.95281029886911E-14"
+        ixz="-3.67831172421937E-15"
+        iyy="3.60005884276146E-05"
+        iyz="7.22076537763307E-14"
+        izz="9.02125908897519E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="/meshes/base_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.894117647058823 0.913725490196078 0.929411764705882 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="/meshes/base_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <link
+    name="leg_1_hip">
+    <inertial>
+      <origin
+        xyz="0.023894004107861 0.0317925842621393 0.0267813099844956"
+        rpy="0 0 0" />
+      <mass
+        value="0.0670777628949341" />
+      <inertia
+        ixx="2.37941932933262E-05"
+        ixy="-1.03091198376384E-06"
+        ixz="-2.08517884925019E-08"
+        iyy="2.49239414062016E-05"
+        iyz="-5.27852175876712E-11"
+        izz="1.06832163800413E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="/meshes/leg_1_hip.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.894117647058823 0.913725490196078 0.929411764705882 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="/meshes/leg_1_hip.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="leg1_hip_joint"
+    type="revolute">
+    <origin
+      xyz="0.0619700000000172 -0.0825571283390229 0.0385000000000288"
+      rpy="3.14159265358962 0 -0.41814402937708" />
+    <parent
+      link="base_link" />
+    <child
+      link="leg_1_hip" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      lower="-3"
+      upper="3"
+      effort="10"
+      velocity="5" />
+  </joint>
+  <link
+    name="leg_1_knee">
+    <inertial>
+      <origin
+        xyz="-0.0387166409997666 0.0235364817007109 -0.0345349531494703"
+        rpy="0 0 0" />
+      <mass
+        value="0.0696914928574291" />
+      <inertia
+        ixx="2.57833728209612E-05"
+        ixy="-3.62846408666017E-07"
+        ixz="-1.12322935757824E-07"
+        iyy="1.97651576206101E-05"
+        iyz="-3.94592499601572E-07"
+        izz="2.57467684548985E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="/meshes/leg_1_knee.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.298039215686275 0.298039215686275 0.298039215686275 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="/meshes/leg_1_knee.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="leg_1_knee_joint"
+    type="revolute">
+    <origin
+      xyz="0.060665 0.04177 0.036307"
+      rpy="3.1416 0 -1.5708" />
+    <parent
+      link="leg_1_hip" />
+    <child
+      link="leg_1_knee" />
+    <axis
+      xyz="0 -1 0" />
+    <limit
+      lower="-3"
+      upper="3"
+      effort="10"
+      velocity="5" />
+  </joint>
+  <link
+    name="leg_1_ankle">
+    <inertial>
+      <origin
+        xyz="-3.98306387872083E-12 0.0280775387533778 0.0172277429079968"
+        rpy="0 0 0" />
+      <mass
+        value="0.0169824099129692" />
+      <inertia
+        ixx="1.11378366738052E-05"
+        ixy="1.53524721689842E-21"
+        ixz="-6.45862622281404E-21"
+        iyy="3.39360074925844E-06"
+        iyz="-1.55642304057978E-20"
+        izz="9.36668224662846E-06" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="/meshes/leg_1_ankle.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.298039215686275 0.298039215686275 0.298039215686275 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="/meshes/leg_1_ankle.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="leg_1_ankle_joint"
+    type="revolute">
+    <origin
+      xyz="-0.0422926219997698 0.000499999999961198 -0.0490579571492742"
+      rpy="3.14159265358979 -1.02694660668611 -3.14159265358979" />
+    <parent
+      link="leg_1_knee" />
+    <child
+      link="leg_1_ankle" />
+    <axis
+      xyz="0 -1 0" />
+    <limit
+      lower="-3"
+      upper="3"
+      effort="10"
+      velocity="5" />
+  </joint>
+  <link
+    name="leg_2_hip">
+    <inertial>
+      <origin
+        xyz="0.0238940050804829 -0.0318845074150191 0.0267811755411331"
+        rpy="0 0 0" />
+      <mass
+        value="0.0670777528778399" />
+      <inertia
+        ixx="2.379418900691E-05"
+        ixy="1.03091155379358E-06"
+        ixz="-2.08139073576659E-08"
+        iyy="2.49239363733954E-05"
+        iyz="-5.37393277223557E-11"
+        izz="1.06832159907143E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="/meshes/leg_2_hip.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.894117647058823 0.913725490196078 0.929411764705882 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="/meshes/leg_2_hip.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="leg_2_hip_joint"
+    type="revolute">
+    <origin
+      xyz="0.06177 0.0055571 0.0385"
+      rpy="3.1416 0 0.54496" />
+    <parent
+      link="base_link" />
+    <child
+      link="leg_2_hip" />
+    <axis
+      xyz="0 0 -1" />
+    <limit
+      lower="-3"
+      upper="3"
+      effort="10"
+      velocity="5" />
+  </joint>
+  <link
+    name="leg_2_knee">
+    <inertial>
+      <origin
+        xyz="0.0110549974171554 0.023536481777629 0.0506895290762288"
+        rpy="0 0 0" />
+      <mass
+        value="0.0696914932142878" />
+      <inertia
+        ixx="2.58517431532061E-05"
+        ixy="1.65388681398787E-07"
+        ixz="-7.3751587462595E-08"
+        iyy="1.97651584638943E-05"
+        iyz="5.09909022971296E-07"
+        izz="2.56783993177785E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="/meshes/leg_2_knee.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.894117647058823 0.913725490196078 0.929411764705882 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="/meshes/leg_2_knee.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="leg_2_knee_joint"
+    type="revolute">
+    <origin
+      xyz="0.0606649999997697 -0.0419699999995024 0.0363071283388973"
+      rpy="0 0 1.57079632679489" />
+    <parent
+      link="leg_2_hip" />
+    <child
+      link="leg_2_knee" />
+    <axis
+      xyz="0 -1 0" />
+    <limit
+      lower="-3"
+      upper="3"
+      effort="10"
+      velocity="5" />
+  </joint>
+  <link
+    name="leg_2_ankle">
+    <inertial>
+      <origin
+        xyz="9.86905002164917E-13 0.0280775387538067 0.0172277429085545"
+        rpy="0 0 0" />
+      <mass
+        value="0.0169824099129693" />
+      <inertia
+        ixx="1.11378366738053E-05"
+        ixy="0"
+        ixz="-8.470329472543E-22"
+        iyy="3.39360074925848E-06"
+        iyz="-2.46168950295781E-20"
+        izz="9.36668224662851E-06" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="/meshes/leg_2_ankle.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.894117647058823 0.913725490196078 0.929411764705882 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="/meshes/leg_2_ankle.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="leg_2_ankle_joint"
+    type="revolute">
+    <origin
+      xyz="0.0219468821643397 0.000499999999761358 0.060939998347338"
+      rpy="0 0.356620795750289 0" />
+    <parent
+      link="leg_2_knee" />
+    <child
+      link="leg_2_ankle" />
+    <axis
+      xyz="0 -1 0" />
+    <limit
+      lower="-3"
+      upper="3"
+      effort="10"
+      velocity="5" />
+  </joint>
+  <link
+    name="leg_3_hip">
+    <inertial>
+      <origin
+        xyz="0.0241828876323646 0.0321769623795727 0.0275025603079384"
+        rpy="0 0 0" />
+      <mass
+        value="0.0662764728810252" />
+      <inertia
+        ixx="2.37727651303089E-05"
+        ixy="-1.03091246103677E-06"
+        ixz="-2.08509181980546E-08"
+        iyy="2.49025132850325E-05"
+        iyz="-5.19481193733883E-11"
+        izz="1.06429150428759E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="/meshes/leg_3_hip.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.894117647058823 0.913725490196078 0.929411764705882 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="/meshes/leg_3_hip.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="leg_3_hip_joint"
+    type="revolute">
+    <origin
+      xyz="-0.04277 0.0055571 0.0395"
+      rpy="-3.1416 0 3.1072" />
+    <parent
+      link="base_link" />
+    <child
+      link="leg_3_hip" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      lower="-3"
+      upper="3"
+      effort="10"
+      velocity="5" />
+  </joint>
+  <link
+    name="leg_3_knee">
+    <inertial>
+      <origin
+        xyz="0.0225357572648598 0.0235364816237056 0.0467309417131403"
+        rpy="0 0 0" />
+      <mass
+        value="0.069691492442735" />
+      <inertia
+        ixx="2.58574872475247E-05"
+        ixy="1.84030420067332E-07"
+        ixz="-6.64122491876849E-08"
+        iyy="1.97651578429498E-05"
+        iyz="5.03481431369437E-07"
+        izz="2.56726543908688E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="/meshes/leg_3_knee.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.298039215686275 0.298039215686275 0.298039215686275 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="/meshes/leg_3_knee.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="leg_3_knee_joint"
+    type="revolute">
+    <origin
+      xyz="0.0606649999998765 0.0417700000000485 0.0373071283385479"
+      rpy="0 0 1.57079632679489" />
+    <parent
+      link="leg_3_hip" />
+    <child
+      link="leg_3_knee" />
+    <axis
+      xyz="0 1 0" />
+    <limit
+      lower="-3"
+      upper="3"
+      effort="10"
+      velocity="5" />
+  </joint>
+  <link
+    name="leg_3_ankle">
+    <inertial>
+      <origin
+        xyz="-3.30652172308987E-13 -0.0280775387533545 -0.0172277429084622"
+        rpy="0 0 0" />
+      <mass
+        value="0.0169824099129692" />
+      <inertia
+        ixx="1.11378366738052E-05"
+        ixy="8.78796682776337E-21"
+        ixz="-1.90582413132218E-21"
+        iyy="3.39360074925847E-06"
+        iyz="-9.95263713023803E-21"
+        izz="9.3666822466284E-06" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="/meshes/leg_3_ankle.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.894117647058823 0.913725490196078 0.929411764705882 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="/meshes/leg_3_ankle.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="leg_3_ankle"
+    type="revolute">
+    <origin
+      xyz="0.0202761874384253 0.000500000000029699 0.0615160569142232"
+      rpy="3.14159265358979 -0.274725018284468 0" />
+    <parent
+      link="leg_3_knee" />
+    <child
+      link="leg_3_ankle" />
+    <axis
+      xyz="0 -1 0" />
+    <limit
+      lower="-3"
+      upper="3"
+      effort="10"
+      velocity="5" />
+  </joint>
+  <link
+    name="leg_4_hip">
+    <inertial>
+      <origin
+        xyz="0.024182889019188 -0.0321769654652539 0.026502425862378"
+        rpy="0 0 0" />
+      <mass
+        value="0.0662764580966186" />
+      <inertia
+        ixx="2.37727591004462E-05"
+        ixy="1.03091197436943E-06"
+        ixz="-2.08149627078279E-08"
+        iyy="2.49025063124138E-05"
+        iyz="-5.32912336203291E-11"
+        izz="1.06429146593243E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="/meshes/leg_4_hip.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.298039215686275 0.298039215686275 0.298039215686275 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="/meshes/leg_4_hip.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="leg_4_hip_joint"
+    type="revolute">
+    <origin
+      xyz="-0.0427699999999003 -0.0825571283390557 0.0385000000000234"
+      rpy="-3.14159265358965 0 2.41920858927978" />
+    <parent
+      link="base_link" />
+    <child
+      link="leg_4_hip" />
+    <axis
+      xyz="0 0 -1" />
+    <limit
+      lower="-3"
+      upper="3"
+      effort="10"
+      velocity="5" />
+  </joint>
+  <link
+    name="leg_4_knee">
+    <inertial>
+      <origin
+        xyz="0.00942340048075729 -0.0235364817821382 0.0510180443603401"
+        rpy="0 0 0" />
+      <mass
+        value="0.0696914932488972" />
+      <inertia
+        ixx="2.58784171274788E-05"
+        ixy="-4.48351284777188E-08"
+        ixz="-1.01973366224741E-08"
+        iyy="1.97651576452152E-05"
+        iyz="-5.34182043708516E-07"
+        izz="2.56517241572261E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="/meshes/leg_4_knee.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.894117647058823 0.913725490196078 0.929411764705882 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="/meshes/leg_4_knee.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="leg_4_knee_joint"
+    type="revolute">
+    <origin
+      xyz="0.0606649999987373 -0.0417700000005795 0.0363071283371144"
+      rpy="0 0 -1.5707963267949" />
+    <parent
+      link="leg_4_hip" />
+    <child
+      link="leg_4_knee" />
+    <axis
+      xyz="0 -1 0" />
+    <limit
+      lower="-3"
+      upper="3"
+      effort="10"
+      velocity="5" />
+  </joint>
+  <link
+    name="leg_4_ankle">
+    <inertial>
+      <origin
+        xyz="-9.47186773458952E-13 -0.028077538754893 -0.0172277429078579"
+        rpy="0 0 0" />
+      <mass
+        value="0.0169824099129693" />
+      <inertia
+        ixx="1.11378366738053E-05"
+        ixy="1.87935435172048E-20"
+        ixz="6.35274710440725E-22"
+        iyy="3.39360074925848E-06"
+        iyz="-6.88214269644119E-21"
+        izz="9.36668224662848E-06" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="/meshes/leg_4_ankle.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.894117647058823 0.913725490196078 0.929411764705882 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="/meshes/leg_4_ankle.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="leg_4_ankle_joint"
+    type="revolute">
+    <origin
+      xyz="0.00334718403264728 -0.000499999997990497 0.0646849703924581"
+      rpy="-3.14159265358979 -0.519801357312693 3.14159265358979" />
+    <parent
+      link="leg_4_knee" />
+    <child
+      link="leg_4_ankle" />
+    <axis
+      xyz="0 -1 0" />
+    <limit
+      lower="-3"
+      upper="3"
+      effort="10"
+      velocity="5" />
+  </joint>
+</robot>
