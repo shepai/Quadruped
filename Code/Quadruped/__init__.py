@@ -1,4 +1,5 @@
 import math as maths
+import numpy as np
 
 class Quadruped:
     def __init__(self,p,robot_id,floor=None):
@@ -50,7 +51,7 @@ class Quadruped:
         for p in points:
             if feet.get(p[3],"wrong")!="wrong": # only gather feet
                 feet[p[3]]=p[9] # gather force
-        return [feet[2],feet[5],feet[8],feet[11]]
+        return np.array([feet[2],feet[5],feet[8],feet[11]])
     def hasFallen(self):
         points=self.getContact()
         for p in points:
