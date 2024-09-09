@@ -111,10 +111,11 @@ env=GYM(p)
 # Initialize PPO model
 #model = PPO("MlpPolicy", env, verbose=1, tensorboard_log="./ppo_quadruped_tensorboard/",device="cuda")
 policy_kwargs = dict(net_arch=dict(pi=[32, 64], qf=[100, 50]))
-model = A2C("MlpPolicy", env, policy_kwargs=policy_kwargs, verbose=1)
+model = A2C("MlpPolicy", env, learning_rate=0.005,policy_kwargs=policy_kwargs, verbose=1,device="cuda")
 # Train the model
 model.learn(total_timesteps=100000)  # Adjust the number of timesteps as needed
-
+history=np.array(env.reward_history)
+np.save("C:/Users/dexte/Documents/GitHub/Quadruped/Code/history",history)
 # Save the model
 model.save("C:/Users/dexte/Documents/GitHub/Quadruped/modelRF_A2C_2.zip")
 p.disconnect()
