@@ -1,4 +1,4 @@
-path="C:/Users/dexte/Documents/GitHub/Quadruped/Quadruped_sim/urdf/"
+path="C:/Users/dexte/Documents/GitHub/Quadruped/Quadruped_sim/PressTip/urdf/"
 #path="/its/home/drs25/Documents/GitHub/Quadruped/Quadruped_sim/urdf/"
 import pybullet as p
 import pybullet_data
@@ -7,7 +7,7 @@ import numpy as np
 #from stable_baselines3.common.env_checker import check_env
 import gymnasium as gym
 from gymnasium import spaces
-from stable_baselines3 import PPO
+from stable_baselines3 import PPO, A2C
 import time
 def euclidean_distance(point1, point2):
     return np.sqrt(np.sum((np.array(point1) - np.array(point2)) ** 2))
@@ -35,8 +35,14 @@ class GYM(gym.Env):
         self.robot_position=self.quad.getPos()
         self.observation_space=spaces.Box(low= -10, high = 300, shape = (20,), dtype = np.float32)#spaces.Discrete(9)
         self.start_position=self.quad.start
+        self.timer=0
+        self.dt=0.01
     def step(self,action):
-        self.quad.setPositions(action*10)
+        action[action<-1]=-1
+        action[action>1]=1
+        self.quad.setPositions(np.degrees(np.arcsin(action))/2)
+        T=0
+        self.timer+=self.dt
         for i in range(50):
             p.stepSimulation()
             #p.setTimeStep(1./240.)
@@ -45,22 +51,24 @@ class GYM(gym.Env):
         foot_pressure = self.quad.getFeet()
         curr=self.quad.getPos()
         preshape=self.observation_space
-        self.observation_space = np.array(np.concatenate([foot_pressure, orientation,self.quad.motors]), dtype = np.float32).reshape((20,))
+        self.observation_space = np.array(np.concatenate([foot_pressure/10, orientation,np.radians(self.quad.motors)]), dtype = np.float32).reshape((20,))
         #self.observation_space[self.observation_space<0]=0
 
         distance_moved = curr[0]- self.start_position[0]  # Forward movement in x-direction
-        reward = 10 * distance_moved - np.abs(curr[1])  # Penalize deviation from straight line
+        reward = 10 * distance_moved - np.abs(curr[1]-self.start_position[1])  # Penalize deviation from straight line
         if self.view:
             basePos, baseOrn = p.getBasePositionAndOrientation(self.id) # Get model position
             self.p.resetDebugVisualizerCamera( cameraDistance=0.3, cameraYaw=75, cameraPitch=-20, cameraTargetPosition=basePos) # fix camera onto model
 	
         # Check if the episode should end (e.g., robot falls)
         done = self.quad.hasFallen()
+        if done: self.timer=0
+        reward*=self.timer
         return self.observation_space, reward, done, {}, {}
     def observation(self):
         orientation = self.quad.getOrientation()
         foot_pressure = self.quad.getFeet()
-        return np.concatenate([foot_pressure, orientation,self.quad.motors])
+        return np.concatenate([foot_pressure/10, orientation,np.radians(self.quad.motors)])
     def reset(self,seed=0):
         self.p.removeBody(self.id)
         del self.quad
@@ -94,7 +102,7 @@ p.setAdditionalSearchPath(pybullet_data.getDataPath())
 env = GYM(p)
 
 # Load the previously saved model
-model = PPO.load("C:/Users/dexte/Documents/GitHub/Quadruped/modelRF.zip")
+model = A2C.load("C:/Users/dexte/Documents/GitHub/Quadruped/modelRF_A2C.zip")
 
 # Reset the environment
 obs,_ = env.reset()
