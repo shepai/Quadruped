@@ -10,7 +10,7 @@ import os
 import random
 from copy import deepcopy
 # Initialize the PyBullet physics engine
-p.connect(p.GUI)
+p.connect(p.DIRECT)
 p.setAdditionalSearchPath(pybullet_data.getDataPath())
 p.setGravity(0, 0, -9.81)
 p.configureDebugVisualizer(p.COV_ENABLE_GUI,0)
@@ -171,7 +171,9 @@ for gen in range(generations):
     #if gen%10==0:
         #runTrial(population[np.where(fitnesses==np.max(fitnesses))[0][0]],150)
 #play the trials on reapeat
-np.save("genotypes",population)
+import pickle
+with open('genotypes.pkl', 'wb') as f:
+    pickle.dump(population, f)
 np.save("fitnesses",fitnesses)
 
 p.disconnect()
