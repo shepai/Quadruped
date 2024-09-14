@@ -26,7 +26,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://PressTip2/meshes/base_link.STL" />
+          filename="meshes/base_link.STL" />
       </geometry>
       <material
         name="">
@@ -40,7 +40,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://PressTip2/meshes/base_link.STL" />
+          filename="meshes/base_link.STL" />
       </geometry>
     </collision>
   </link>
@@ -66,7 +66,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://PressTip2/meshes/leg1hip.STL" />
+          filename="meshes/leg1hip.STL" />
       </geometry>
       <material
         name="">
@@ -80,7 +80,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://PressTip2/meshes/leg1hip.STL" />
+          filename="meshes/leg1hip.STL" />
       </geometry>
     </collision>
   </link>
@@ -124,7 +124,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://PressTip2/meshes/leg1knee.STL" />
+          filename="meshes/leg1knee.STL" />
       </geometry>
       <material
         name="">
@@ -138,7 +138,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://PressTip2/meshes/leg1knee.STL" />
+          filename="meshes/leg1knee.STL" />
       </geometry>
     </collision>
   </link>
@@ -182,7 +182,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://PressTip2/meshes/leg1foot.STL" />
+          filename="meshes/leg1foot.STL" />
       </geometry>
       <material
         name="">
@@ -196,7 +196,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://PressTip2/meshes/leg1foot.STL" />
+          filename="meshes/leg1foot.STL" />
       </geometry>
     </collision>
   </link>
@@ -240,7 +240,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://PressTip2/meshes/tip1.STL" />
+          filename="meshes/tip1.STL" />
       </geometry>
       <material
         name="">
@@ -254,7 +254,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://PressTip2/meshes/tip1.STL" />
+          filename="meshes/tip1.STL" />
       </geometry>
     </collision>
   </link>
@@ -293,7 +293,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://PressTip2/meshes/leg2hip.STL" />
+          filename="meshes/leg2hip.STL" />
       </geometry>
       <material
         name="">
@@ -307,7 +307,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://PressTip2/meshes/leg2hip.STL" />
+          filename="meshes/leg2hip.STL" />
       </geometry>
     </collision>
   </link>
@@ -351,7 +351,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://PressTip2/meshes/leg2knee.STL" />
+          filename="meshes/leg2knee.STL" />
       </geometry>
       <material
         name="">
@@ -365,7 +365,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://PressTip2/meshes/leg2knee.STL" />
+          filename="meshes/leg2knee.STL" />
       </geometry>
     </collision>
   </link>
@@ -409,7 +409,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://PressTip2/meshes/leg2foot.STL" />
+          filename="meshes/leg2foot.STL" />
       </geometry>
       <material
         name="">
@@ -423,7 +423,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://PressTip2/meshes/leg2foot.STL" />
+          filename="meshes/leg2foot.STL" />
       </geometry>
     </collision>
   </link>
@@ -467,7 +467,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://PressTip2/meshes/tip2.STL" />
+          filename="meshes/tip2.STL" />
       </geometry>
       <material
         name="">
@@ -481,7 +481,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://PressTip2/meshes/tip2.STL" />
+          filename="meshes/tip2.STL" />
       </geometry>
     </collision>
   </link>
@@ -520,7 +520,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://PressTip2/meshes/leg3hip.STL" />
+          filename="meshes/leg3hip.STL" />
       </geometry>
       <material
         name="">
@@ -534,7 +534,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://PressTip2/meshes/leg3hip.STL" />
+          filename="meshes/leg3hip.STL" />
       </geometry>
     </collision>
   </link>
@@ -578,7 +578,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://PressTip2/meshes/leg3knee.STL" />
+          filename="meshes/leg3knee.STL" />
       </geometry>
       <material
         name="">
@@ -592,7 +592,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://PressTip2/meshes/leg3knee.STL" />
+          filename="meshes/leg3knee.STL" />
       </geometry>
     </collision>
   </link>
@@ -636,7 +636,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://PressTip2/meshes/leg3foot.STL" />
+          filename="meshes/leg3foot.STL" />
       </geometry>
       <material
         name="">
@@ -650,7 +650,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://PressTip2/meshes/leg3foot.STL" />
+          filename="meshes/leg3foot.STL" />
       </geometry>
     </collision>
   </link>
@@ -694,7 +694,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://PressTip2/meshes/tip3.STL" />
+          filename="meshes/tip3.STL" />
       </geometry>
       <material
         name="">
@@ -708,7 +708,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://PressTip2/meshes/tip3.STL" />
+          filename="meshes/tip3.STL" />
       </geometry>
     </collision>
   </link>
@@ -747,7 +747,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://PressTip2/meshes/leg4hip.STL" />
+          filename="meshes/leg4hip.STL" />
       </geometry>
       <material
         name="">
@@ -761,7 +761,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://PressTip2/meshes/leg4hip.STL" />
+          filename="meshes/leg4hip.STL" />
       </geometry>
     </collision>
   </link>
@@ -805,7 +805,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://PressTip2/meshes/leg4knee.STL" />
+          filename="meshes/leg4knee.STL" />
       </geometry>
       <material
         name="">
@@ -819,7 +819,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://PressTip2/meshes/leg4knee.STL" />
+          filename="meshes/leg4knee.STL" />
       </geometry>
     </collision>
   </link>
@@ -863,7 +863,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://PressTip2/meshes/leg4foot.STL" />
+          filename="meshes/leg4foot.STL" />
       </geometry>
       <material
         name="">
@@ -877,7 +877,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://PressTip2/meshes/leg4foot.STL" />
+          filename="meshes/leg4foot.STL" />
       </geometry>
     </collision>
   </link>
@@ -921,7 +921,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://PressTip2/meshes/tip4.STL" />
+          filename="meshes/tip4.STL" />
       </geometry>
       <material
         name="">
@@ -935,7 +935,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://PressTip2/meshes/tip4.STL" />
+          filename="meshes/tip4.STL" />
       </geometry>
     </collision>
   </link>
