@@ -1,0 +1,955 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- This URDF was automatically created by SolidWorks to URDF Exporter! Originally created by Stephen Brawner (brawner@gmail.com) 
+     Commit Version: 1.6.0-4-g7f85cfe  Build Version: 1.6.7995.38578
+     For more information, please see http://wiki.ros.org/sw_urdf_exporter -->
+<robot
+  name="PressTip2">
+  <link
+    name="base_link">
+    <inertial>
+      <origin
+        xyz="0.00952304123999947 -0.0384999999881607 0.0139434635768425"
+        rpy="0 0 0" />
+      <mass
+        value="0.267600954851823" />
+      <inertia
+        ixx="9.27694548781876E-05"
+        ixy="7.79226502929924E-14"
+        ixz="-7.9280589797108E-16"
+        iyy="3.60005884314317E-05"
+        iyz="-3.30120540973489E-13"
+        izz="9.02125908580329E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://PressTip2/meshes/base_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.894117647058823 0.913725490196078 0.929411764705882 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://PressTip2/meshes/base_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <link
+    name="leg1hip">
+    <inertial>
+      <origin
+        xyz="-0.136502545920463 0.0339734375719654 0.0267811756418005"
+        rpy="0 0 0" />
+      <mass
+        value="0.0670777549223611" />
+      <inertia
+        ixx="2.33062831866396E-05"
+        ixy="5.2298798470944E-07"
+        ixz="1.98429301995519E-08"
+        iyy="2.54118427747887E-05"
+        iyz="6.28630114786444E-09"
+        izz="1.06832167784737E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://PressTip2/meshes/leg1hip.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.298039215686275 0.298039215686275 0.298039215686275 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://PressTip2/meshes/leg1hip.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="leg1hip"
+    type="revolute">
+    <origin
+      xyz="0.06197 -0.082557 0.0385"
+      rpy="-3.1416 0 -0.10328" />
+    <parent
+      link="base_link" />
+    <child
+      link="leg1hip" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      lower="-3"
+      upper="3"
+      effort="10"
+      velocity="0" />
+  </joint>
+  <link
+    name="leg1knee">
+    <inertial>
+      <origin
+        xyz="-0.00674862816632921 0.215606129370829 -0.0510180443493649"
+        rpy="0 0 0" />
+      <mass
+        value="0.0696914932488917" />
+      <inertia
+        ixx="2.5355435148491E-05"
+        ixy="-1.71044565602173E-06"
+        ixz="1.50294909611846E-07"
+        iyy="2.02881391296408E-05"
+        iyz="5.12704470314629E-07"
+        izz="2.56517236643168E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://PressTip2/meshes/leg1knee.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.298039215686275 0.298039215686275 0.298039215686275 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://PressTip2/meshes/leg1knee.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="leg1knee"
+    type="revolute">
+    <origin
+      xyz="0.060665 0.04177 0.036307"
+      rpy="3.1416 0 -1.5708" />
+    <parent
+      link="leg1hip" />
+    <child
+      link="leg1knee" />
+    <axis
+      xyz="0 -1 0" />
+    <limit
+      lower="-3"
+      upper="3"
+      effort="10"
+      velocity="0" />
+  </joint>
+  <link
+    name="leg1foot">
+    <inertial>
+      <origin
+        xyz="-0.10343485583487 0.211039793279907 0.000595693317105211"
+        rpy="0 0 0" />
+      <mass
+        value="0.0169824099129693" />
+      <inertia
+        ixx="1.05186475049124E-05"
+        ixy="1.28624826936999E-06"
+        ixz="4.3829551234744E-07"
+        iyy="4.04936226867087E-06"
+        iyz="1.66122879291606E-06"
+        izz="9.33010989610897E-06" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://PressTip2/meshes/leg1foot.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.894117647058823 0.913725490196078 0.929411764705882 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://PressTip2/meshes/leg1foot.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="leg1foot"
+    type="revolute">
+    <origin
+      xyz="-0.064162 0.0005 0.0088672"
+      rpy="3.1416 -1.021 -3.1416" />
+    <parent
+      link="leg1knee" />
+    <child
+      link="leg1foot" />
+    <axis
+      xyz="0 -1 0" />
+    <limit
+      lower="-3"
+      upper="3"
+      effort="10"
+      velocity="0" />
+  </joint>
+  <link
+    name="tip1">
+    <inertial>
+      <origin
+        xyz="-0.151403518274172 0.0931062279848143 -0.150343676045111"
+        rpy="0 0 0" />
+      <mass
+        value="1.021543946138" />
+      <inertia
+        ixx="0.00807147675069726"
+        ixy="0.00140234335733649"
+        ixz="-0.0003883781922212"
+        iyy="0.00938164975987365"
+        iyz="0.00294842510577905"
+        izz="0.00935002028348309" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://PressTip2/meshes/tip1.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://PressTip2/meshes/tip1.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="tip1"
+    type="fixed">
+    <origin
+      xyz="-0.000101024689847629 0.0270411985594858 0.0770319360063324"
+      rpy="0.302196999514515 -1.04042812036827 0.879257977617477" />
+    <parent
+      link="leg1foot" />
+    <child
+      link="tip1" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+  <link
+    name="leg2hip">
+    <inertial>
+      <origin
+        xyz="-0.079093733292414 0.095421547920738 0.0267813099848397"
+        rpy="0 0 0" />
+      <mass
+        value="0.0670777628949343" />
+      <inertia
+        ixx="2.55221141942247E-05"
+        ixy="-1.70836416372318E-07"
+        ixz="-1.18624068043133E-08"
+        iyy="2.31960211828011E-05"
+        iyz="-1.71486776397205E-08"
+        izz="1.06832164468021E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://PressTip2/meshes/leg2hip.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.298039215686275 0.298039215686275 0.298039215686275 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://PressTip2/meshes/leg2hip.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="leg2hip"
+    type="revolute">
+    <origin
+      xyz="0.06177 0.0055571 0.0385"
+      rpy="3.1416 0 0.85982" />
+    <parent
+      link="base_link" />
+    <child
+      link="leg2hip" />
+    <axis
+      xyz="0 0 -1" />
+    <limit
+      lower="-3"
+      upper="3"
+      effort="10"
+      velocity="0" />
+  </joint>
+  <link
+    name="leg2knee">
+    <inertial>
+      <origin
+        xyz="0.1825165643668 0.181462389357358 -0.0137522420267576"
+        rpy="0 0 0" />
+      <mass
+        value="0.069691492685462" />
+      <inertia
+        ixx="2.11899830949233E-05"
+        ixy="2.57705989130958E-06"
+        ixz="9.09472954820181E-08"
+        iyy="2.42302946330039E-05"
+        iyz="-2.74836642894841E-08"
+        izz="2.58750210300591E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://PressTip2/meshes/leg2knee.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.894117647058823 0.913725490196078 0.929411764705882 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://PressTip2/meshes/leg2knee.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="leg2knee"
+    type="revolute">
+    <origin
+      xyz="0.060665 -0.04197 0.036307"
+      rpy="0 0 1.5708" />
+    <parent
+      link="leg2hip" />
+    <child
+      link="leg2knee" />
+    <axis
+      xyz="0 -1 0" />
+    <limit
+      lower="-3"
+      upper="3"
+      effort="10"
+      velocity="0" />
+  </joint>
+  <link
+    name="leg2foot">
+    <inertial>
+      <origin
+        xyz="0.176349741416627 0.207505657463135 0.120703214132473"
+        rpy="0 0 0" />
+      <mass
+        value="0.0169824099129692" />
+      <inertia
+        ixx="9.12188154013556E-06"
+        ixy="2.38012835368654E-06"
+        ixz="-2.39906888222016E-06"
+        iyy="7.74527918711269E-06"
+        iyz="1.97852558674322E-06"
+        izz="7.03095894244392E-06" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://PressTip2/meshes/leg2foot.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://PressTip2/meshes/leg2foot.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="leg2foot"
+    type="revolute">
+    <origin
+      xyz="-0.0090563 0.0005 0.064135"
+      rpy="0 0.90437 0" />
+    <parent
+      link="leg2knee" />
+    <child
+      link="leg2foot" />
+    <axis
+      xyz="0 -1 0" />
+    <limit
+      lower="-3"
+      upper="3"
+      effort="10"
+      velocity="0" />
+  </joint>
+  <link
+    name="tip2">
+    <inertial>
+      <origin
+        xyz="0.0616299556996172 -0.0533389324482793 -0.0832958561214714"
+        rpy="0 0 0" />
+      <mass
+        value="1.021543946138" />
+      <inertia
+        ixx="0.00807147675069808"
+        ixy="0.0014023433573373"
+        ixz="-0.000388378192221142"
+        iyy="0.00938164975987325"
+        iyz="0.00294842510577955"
+        izz="0.00935002028348457" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://PressTip2/meshes/tip2.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://PressTip2/meshes/tip2.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="tip2"
+    type="fixed">
+    <origin
+      xyz="0.0207574252558445 0.0539472967723882 0.0585204619945834"
+      rpy="0.108034782661089 -0.266022394014478 1.58812115881638" />
+    <parent
+      link="leg2foot" />
+    <child
+      link="tip2" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+  <link
+    name="leg3hip">
+    <inertial>
+      <origin
+        xyz="-0.102994173955558 0.0108235339254346 0.0277811755409549"
+        rpy="0 0 0" />
+      <mass
+        value="0.067077752877843" />
+      <inertia
+        ixx="2.50773829829837E-05"
+        ixy="9.30525048173067E-07"
+        ixz="1.74471145520508E-08"
+        iyy="2.36407423953912E-05"
+        iyz="-1.13498816191934E-08"
+        izz="1.06832159906881E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://PressTip2/meshes/leg3hip.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.298039215686275 0.298039215686275 0.298039215686275 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://PressTip2/meshes/leg3hip.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="leg3hip"
+    type="revolute">
+    <origin
+      xyz="-0.04277 0.0055571 0.0395"
+      rpy="3.1416 0 -2.8611" />
+    <parent
+      link="base_link" />
+    <child
+      link="leg3hip" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      lower="-3"
+      upper="3"
+      effort="10"
+      velocity="0" />
+  </joint>
+  <link
+    name="leg3knee">
+    <inertial>
+      <origin
+        xyz="-0.00362956113816343 0.161603209027011 0.0499844029884496"
+        rpy="0 0 0" />
+      <mass
+        value="0.069691493127974" />
+      <inertia
+        ixx="2.39594545545256E-05"
+        ixy="-2.83587190315488E-06"
+        ixz="-3.14243072082384E-07"
+        iyy="2.16805482110879E-05"
+        iyz="-4.25516587670558E-07"
+        izz="2.56552944566604E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://PressTip2/meshes/leg3knee.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.298039215686275 0.298039215686275 0.298039215686275 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://PressTip2/meshes/leg3knee.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="leg3knee"
+    type="revolute">
+    <origin
+      xyz="0.060665 0.04177 0.037307"
+      rpy="0 0 1.5708" />
+    <parent
+      link="leg3hip" />
+    <child
+      link="leg3knee" />
+    <axis
+      xyz="0 1 0" />
+    <limit
+      lower="-3"
+      upper="3"
+      effort="10"
+      velocity="0" />
+  </joint>
+  <link
+    name="leg3foot">
+    <inertial>
+      <origin
+        xyz="-0.0372580021578814 -0.166949825799052 -0.0235832087357503"
+        rpy="0 0 0" />
+      <mass
+        value="0.0169824099129692" />
+      <inertia
+        ixx="8.56429761020069E-06"
+        ixy="3.06572390786065E-06"
+        ixz="-1.22201851598323E-06"
+        iyy="5.38668975945526E-06"
+        iyz="3.23745537908854E-07"
+        izz="9.94713230003612E-06" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://PressTip2/meshes/leg3foot.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://PressTip2/meshes/leg3foot.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="leg3foot"
+    type="revolute">
+    <origin
+      xyz="0.020276 0.0005 0.061516"
+      rpy="-3.1416 -0.25865 0" />
+    <parent
+      link="leg3knee" />
+    <child
+      link="leg3foot" />
+    <axis
+      xyz="0 -1 0" />
+    <limit
+      lower="-3"
+      upper="3"
+      effort="10"
+      velocity="0" />
+  </joint>
+  <link
+    name="tip3">
+    <inertial>
+      <origin
+        xyz="0.0255754432127869 -0.124908371854871 0.0183770760335439"
+        rpy="0 0 0" />
+      <mass
+        value="1.021543946138" />
+      <inertia
+        ixx="0.00807147675069801"
+        ixy="0.00140234335733683"
+        ixz="-0.000388378192218565"
+        iyy="0.00938164975986799"
+        iyz="0.0029484251057796"
+        izz="0.00935002028348601" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://PressTip2/meshes/tip3.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://PressTip2/meshes/tip3.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="tip3"
+    type="fixed">
+    <origin
+      xyz="-0.0190794753111903 -0.058824970193975 -0.0443527597840932"
+      rpy="-2.30413098931178 0.35427779979258 2.29935458574334" />
+    <parent
+      link="leg3foot" />
+    <child
+      link="tip3" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+  <link
+    name="leg4hip">
+    <inertial>
+      <origin
+        xyz="0.0735697836970589 0.0902853308547147 0.0267813084202929"
+        rpy="0 0 0" />
+      <mass
+        value="0.0670777697067695" />
+      <inertia
+        ixx="2.32383247796946E-05"
+        ixy="3.54673715451923E-07"
+        ixz="-1.61402066542683E-08"
+        iyy="2.54798152454137E-05"
+        iyz="1.32000711664349E-08"
+        izz="1.0683217265543E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://PressTip2/meshes/leg4hip.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.894117647058823 0.913725490196078 0.929411764705882 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://PressTip2/meshes/leg4hip.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="leg4hip"
+    type="revolute">
+    <origin
+      xyz="-0.04277 -0.082557 0.0385"
+      rpy="3.1416 0 2.7341" />
+    <parent
+      link="base_link" />
+    <child
+      link="leg4hip" />
+    <axis
+      xyz="0 0 -1" />
+    <limit
+      lower="-3"
+      upper="3"
+      effort="10"
+      velocity="0" />
+  </joint>
+  <link
+    name="leg4knee">
+    <inertial>
+      <origin
+        xyz="-0.148768040222029 0.0437745780666372 0.0467309417142032"
+        rpy="0 0 0" />
+      <mass
+        value="0.0696914924427386" />
+      <inertia
+        ixx="2.35814207970751E-05"
+        ixy="-2.95295365181571E-06"
+        ixz="-2.68409171305232E-07"
+        iyy="2.20412242944346E-05"
+        iyz="-4.31115593836177E-07"
+        izz="2.56726543917293E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://PressTip2/meshes/leg4knee.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.298039215686275 0.298039215686275 0.298039215686275 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://PressTip2/meshes/leg4knee.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="leg4knee"
+    type="revolute">
+    <origin
+      xyz="0.060665 -0.04177 0.036307"
+      rpy="0 0 -1.5708" />
+    <parent
+      link="leg4hip" />
+    <child
+      link="leg4knee" />
+    <axis
+      xyz="0 -1 0" />
+    <limit
+      lower="-3"
+      upper="3"
+      effort="10"
+      velocity="0" />
+  </joint>
+  <link
+    name="leg4foot">
+    <inertial>
+      <origin
+        xyz="0.137030913824132 0.0361473741552383 0.0628844607398377"
+        rpy="0 0 0" />
+      <mass
+        value="0.0169824099129692" />
+      <inertia
+        ixx="8.61677404382058E-06"
+        ixy="3.38594127409794E-06"
+        ixz="-8.33802892059883E-07"
+        iyy="6.46959561489581E-06"
+        iyz="1.61734603280617E-06"
+        izz="8.81175001097569E-06" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://PressTip2/meshes/leg4foot.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://PressTip2/meshes/leg4foot.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="leg4foot"
+    type="revolute">
+    <origin
+      xyz="0.0033472 -0.0005 0.064685"
+      rpy="-3.1416 -0.5198 3.1416" />
+    <parent
+      link="leg4knee" />
+    <child
+      link="leg4foot" />
+    <axis
+      xyz="0 -1 0" />
+    <limit
+      lower="-3"
+      upper="3"
+      effort="10"
+      velocity="0" />
+  </joint>
+  <link
+    name="tip4">
+    <inertial>
+      <origin
+        xyz="-0.162189485973653 -0.10193853485507 -0.0180682333144485"
+        rpy="0 0 0" />
+      <mass
+        value="1.021543946138" />
+      <inertia
+        ixx="0.00807147675069843"
+        ixy="0.00140234335733698"
+        ixz="-0.000388378192218483"
+        iyy="0.00938164975986791"
+        iyz="0.00294842510577988"
+        izz="0.00935002028348616" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://PressTip2/meshes/tip4.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://PressTip2/meshes/tip4.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="tip4"
+    type="fixed">
+    <origin
+      xyz="-0.00014133809495781 -0.0275963548029249 -0.0770319359290908"
+      rpy="-2.1752729161704 0.693019440824307 3.01003589745861" />
+    <parent
+      link="leg4foot" />
+    <child
+      link="tip4" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+</robot>
