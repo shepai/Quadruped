@@ -17,7 +17,7 @@ p.connect(p.GUI)
 p.setAdditionalSearchPath(pybullet_data.getDataPath())
 
 # Initialize the environment
-env = GYM(p)
+env = GYM()
 
 # Load the previously saved model
 model = PPO.load("/its/home/drs25/Documents/GitHub/Quadruped/ppo_quadruped_model.zip")
