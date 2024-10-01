@@ -3,9 +3,9 @@ from copy import deepcopy
 from agent import *
 
 class Network:
-    def __init__(self,num):
+    def __init__(self,num,std=5):
         self.A=np.zeros((num))
-        self.weights=np.random.normal(0,2,(num,num))
+        self.weights=np.random.normal(0,std,(num,num))
         np.fill_diagonal(self.weights, 0) #zero self weights
         self.Tau=1
         self.dt=0.01
@@ -40,7 +40,7 @@ class CPG(agent):
             positions.append(Inputs[2])
         return np.degrees(np.array(positions))
     def set_genotype(self, values):
-        self.cpg.weights+=values
+        self.cpg.weights=values
         self.populateBody()
         return super().set_genotype(self.cpg.weights)
     
