@@ -9,6 +9,8 @@ def fitness_(robot):
     return distance
 def euclidean_distance(point1, point2):
     return np.sqrt(np.sum((np.array(point1) - np.array(point2)) ** 2))
+
+#agent goes in population generation
 #initial
 population_size=10
 population=[CPG(6) for _ in range(population_size)]#np.random.choice([50, 20, 0,0,0,0,-20],(150,15,12)) #12 motors, 15 steps
