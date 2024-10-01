@@ -3,13 +3,13 @@ from copy import deepcopy
 from agent import *
 
 class Network:
-    def __init__(self,num,std=5):
+    def __init__(self,num,std=2):
         self.A=np.zeros((num))
         self.weights=np.random.normal(0,std,(num,num))
         np.fill_diagonal(self.weights, 0) #zero self weights
         self.Tau=1
         self.dt=0.01
-        self.b=-4
+        self.b=0
     def sigma(self,x):
         return 1/(1+np.exp(-x))
     def forward(self,I=0):
@@ -32,17 +32,19 @@ class CPG(agent):
     def get_positions(self,inputs):
         positions=[]
         Inputs=np.zeros((self.num_neurons))
+        Inputs[0]+=inputs[0] #add proprioception
+        Inputs[1]+=inputs[1]
+        Inputs[2]+=inputs[2]
         for cpg in self.body:
-            Inputs[0]=inputs[0]
-            Inputs[1]=inputs[1]
-            Inputs[2]=inputs[2]
             out=cpg.forward(I=Inputs) #forward
-            Inputs=np.zeros((self.num_neurons))
-            Inputs+=out*30
+            Inputs=out
+            Inputs[0]+=inputs[0]
+            Inputs[1]+=inputs[1]
+            Inputs[2]+=inputs[2]
             positions.append(Inputs[0]) #select neuron outputs as proportional to motor
             positions.append(Inputs[1])
             positions.append(Inputs[2])
-        return np.degrees(np.array(positions))
+        return np.array(positions)
     def set_genotype(self, values):
         self.cpg.weights=values
         self.populateBody()
