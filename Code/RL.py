@@ -13,7 +13,7 @@ from environment import *
 def euclidean_distance(point1, point2):
     return np.sqrt(np.sum((np.array(point1) - np.array(point2)) ** 2))
 
-env=GYM(p)
+env=GYM()
 #check_env(env)
 # Initialize PPO model
 model = PPO("MlpPolicy", env, verbose=1, tensorboard_log="./ppo_quadruped_tensorboard/",device="cuda")
