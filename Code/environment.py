@@ -38,10 +38,11 @@ class environment:
         self.quad=Quadruped.Quadruped(p,self.robot_id,self.plane_id)
         self.quad.neutral=[-10,0,30,0,0,0,0,0,0,0,0,0]
         self.quad.reset()
-    def runTrial(self,agent,generations,delay=False,fitness=demo(0)):
+    def runTrial(self,agent,generations,delay=False,fitness=demo):
         self.reset()
         for i in range(generations):
-            motor_positions=agent.get_positions()
+            motor_positions=agent.get_positions(self.quad.motors)
+            self.quad.setPositions(motor_positions)
             for k in range(10): #update simulation
                 p.stepSimulation()
                 if delay: time.sleep(1./240.)

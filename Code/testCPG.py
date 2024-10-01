@@ -7,9 +7,9 @@ from copy import deepcopy
 matplotlib.use('TkAgg')
 
 class Network:
-    def __init__(self,num):
+    def __init__(self,num,std=5):
         self.A=np.zeros((num))
-        self.weights=np.random.normal(0,2,(num,num))
+        self.weights=np.random.normal(0,std,(num,num))
         np.fill_diagonal(self.weights, 0) #zero self weights
         self.Tau=1
         self.dt=0.01
@@ -31,7 +31,7 @@ data=np.zeros((4,SAMPLE,Neurons))
 last_Input=np.zeros_like(arc[0].A)
 for i in range(SAMPLE):
     for j in range(4):
-        #last_Input=np.random.random(Neurons)*10
+        last_Input=np.random.random(Neurons)*10
         nodes=arc[j].forward(I=last_Input)
         lastInput=nodes.copy()
         data[j][i]=nodes.flatten()
