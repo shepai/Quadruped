@@ -31,17 +31,17 @@ data=np.zeros((4,SAMPLE,Neurons))
 last_Input=np.zeros_like(arc[0].A)
 for i in range(SAMPLE):
     for j in range(4):
-        last_Input=np.random.random(Neurons)*10
+        #last_Input=np.random.random(Neurons)*10
         nodes=arc[j].forward(I=last_Input)
         lastInput=nodes.copy()
         data[j][i]=nodes.flatten()
 
 data=np.array(data)
 print(data.shape)
-for j in range(Neurons):
+for j in range(4):
     #for i in range(len(data[j].T)):
-    #plt.plot(data[j].T[4],label="Output network"+str(j))
-    plt.plot(data[0].T[j],label="Output neuron"+str(j))
+    plt.plot(data[j].T[4],label="Output network"+str(j))
+    #plt.plot(data[0].T[j],label="Output neuron"+str(j))
     
 plt.legend(loc="upper left")
 plt.show()

@@ -1,4 +1,5 @@
 #skeleton class for all the models
+import numpy as np
 class agent:
     def __init__(self):
         self.positions=[0 for i in range(12)]
@@ -9,4 +10,6 @@ class agent:
         self.geno=values
     def get_genotype(self):
         return self.geno
+    def mutate(self,p=0.1):
+        self.geno+=np.random.normal(0,5*p,self.geno.shape)
     

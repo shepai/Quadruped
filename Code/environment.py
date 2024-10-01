@@ -10,7 +10,7 @@ import numpy as np
 import os
 import random
 from copy import deepcopy
-def demo():
+def demo(variable):
     return 0
 class environment:
     def __init__(self,show=False):
@@ -38,7 +38,7 @@ class environment:
         self.quad=Quadruped.Quadruped(p,self.robot_id,self.plane_id)
         self.quad.neutral=[-10,0,30,0,0,0,0,0,0,0,0,0]
         self.quad.reset()
-    def runTrial(self,agent,generations,delay=False,fitness=demo()):
+    def runTrial(self,agent,generations,delay=False,fitness=demo(0)):
         self.reset()
         for i in range(generations):
             motor_positions=agent.get_positions()
