@@ -29,12 +29,16 @@ class CPG(agent):
         self.body=[]
         for i in range(4): #one for each leg
             self.body.append(deepcopy(self.cpg))
-    def get_positions(self):
+    def get_positions(self,inputs):
         positions=[]
         Inputs=np.zeros((self.num_neurons))
         for cpg in self.body:
+            Inputs[0]=inputs[0]
+            Inputs[1]=inputs[1]
+            Inputs[2]=inputs[2]
             out=cpg.forward(I=Inputs) #forward
-            Inputs=out*30
+            Inputs=np.zeros((self.num_neurons))
+            Inputs+=out*30
             positions.append(Inputs[0]) #select neuron outputs as proportional to motor
             positions.append(Inputs[1])
             positions.append(Inputs[2])
