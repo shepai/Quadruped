@@ -1,6 +1,6 @@
 path="C:/Users/dexte/Documents/GitHub/Quadruped/Quadruped_sim/urdf/"
 path="/its/home/drs25/Documents/GitHub/Quadruped/Quadruped_sim/PressTip/urdf/"
-path="C:/Users/dexte/Documents/GitHub/Quadruped/Quadruped_sim/PressTip/urdf/"
+#path="C:/Users/dexte/Documents/GitHub/Quadruped/Quadruped_sim/PressTip/urdf/"
 import pybullet as p
 import pybullet_data
 import time
@@ -64,14 +64,14 @@ class environment:
 
 class GYM(gym.Env):
     metadata = {"render_modes": ["human"], "render_fps": 30}
-    def __init__(self,sim,show=True):
+    def __init__(self,show=True):
         super(GYM, self).__init__()
         if show: p.connect(p.GUI)
         else: p.connect(p.DIRECT)
         p.setAdditionalSearchPath(pybullet_data.getDataPath())
         p.setGravity(0, 0, -9.81)
         p.configureDebugVisualizer(p.COV_ENABLE_GUI,0)
-        self.p=sim
+        self.p=p
         self.p.resetSimulation()
         self.p.setGravity(0, 0, -9.81)
         self.plane_id = self.p.loadURDF('plane.urdf')
