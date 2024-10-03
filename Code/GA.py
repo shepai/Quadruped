@@ -1,7 +1,7 @@
 from environment import *
 from CPG import *
 
-env=environment(True)
+env=environment(0)
 def fitness_(robot):
     distance = (euclidean_distance(robot.getPos()[0:2],robot.start[0:2])*0.8 - euclidean_distance(robot.start_orientation,robot.getOrientation())*0.1)-robot.get_self_collision_count()*0.01
     if distance<0: distance=0
@@ -12,7 +12,7 @@ def euclidean_distance(point1, point2):
 
 #agent goes in population generation
 #initial
-population_size=10
+population_size=50
 population=[CPG(6) for _ in range(population_size)]#np.random.choice([50, 20, 0,0,0,0,-20],(150,15,12)) #12 motors, 15 steps
 fitnesses=np.zeros((population_size,))
 generations=1000

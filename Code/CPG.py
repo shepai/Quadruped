@@ -3,7 +3,7 @@ from copy import deepcopy
 from agent import *
 
 class Network:
-    def __init__(self,num,std=2):
+    def __init__(self,num,std=5):
         self.A=np.zeros((num))
         self.weights=np.random.normal(0,std,(num,num))
         np.fill_diagonal(self.weights, 0) #zero self weights
@@ -23,7 +23,8 @@ class CPG(agent):
         agent.__init__(self)
         self.cpg=Network(num_neurons)
         self.num_neurons=num_neurons
-        self.geno=self.cpg.weights
+        self.geno=np.concatenate([self.cpg.weights.flatten(),[self.cpg.b],[self.cpg.Tau]])
+        self.set_genotype(self.geno)
         self.populateBody()
     def populateBody(self):
         self.body=[]
@@ -41,14 +42,23 @@ class CPG(agent):
             Inputs[0]+=inputs[0]
             Inputs[1]+=inputs[1]
             Inputs[2]+=inputs[2]
+            #Inputs=self.cpg.sigma(Inputs)*15
+            Inputs[Inputs<-40]=-40
+            Inputs[Inputs>40]=40
             positions.append(Inputs[0]) #select neuron outputs as proportional to motor
             positions.append(Inputs[1])
             positions.append(Inputs[2])
         return np.array(positions)
     def set_genotype(self, values):
-        self.cpg.weights=values
+        self.cpg.weights=values[0:len(self.cpg.weights.flatten())].reshape(self.cpg.weights.shape)
+        self.cpg.b=values[len(self.cpg.weights.flatten())]
+        self.cpg.b = -4 if self.cpg.b < -4 else self.cpg.b #cap bias
+        self.cpg.b = 4 if self.cpg.b > 4 else self.cpg.b #cap bias
+        self.cpg.Tau=values[len(self.cpg.weights.flatten())+1]
+        self.cpg.weights[self.cpg.weights>16]=16 #cap weights
+        self.cpg.weights[self.cpg.weights<-16]=-16 #cap weights
         self.populateBody()
-        return super().set_genotype(self.cpg.weights)
+        return super().set_genotype(np.concatenate([self.cpg.weights.flatten(),[self.cpg.b],[self.cpg.Tau]]))
     
 
 if __name__ == "__main__":
