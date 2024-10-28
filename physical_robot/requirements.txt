@@ -2,6 +2,7 @@
 adafruit-circuitpython-ht16k33
 adafruit-circuitpython-servokit
 adafruit-circuitpython-mcp230xx
+adafruit-circuitpython-ads7830
 opencv-python
 torch
 torchvision
