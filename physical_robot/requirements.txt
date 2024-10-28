@@ -1,0 +1,7 @@
+# Python dependancies 
+adafruit-circuitpython-ht16k33
+adafruit-circuitpython-servokit
+opencv-python
+torch
+torchvision
+torchaudio
