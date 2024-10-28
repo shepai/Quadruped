@@ -2,7 +2,7 @@ import time
 from adafruit_servokit import ServoKit
 import numpy as np
 
-class body:
+class Body:
     def __init__(self,i2c=None):
         if type(i2c)==type(None):
             self.kit=ServoKit(channels=16)
@@ -31,8 +31,9 @@ class body:
                 c=0
         #print(time.time()-t,"seconds")
     
-        
+"""        
 b=body()
 b.reset()
 b.schedule_move([10,40,10,30,5,10,10,0,0,0,0,0,0,0,0,0])
+"""
         
