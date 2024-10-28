@@ -1,6 +1,7 @@
 # Python dependancies 
 adafruit-circuitpython-ht16k33
 adafruit-circuitpython-servokit
+adafruit-circuitpython-mcp230xx
 opencv-python
 torch
 torchvision
