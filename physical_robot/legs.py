@@ -19,30 +19,35 @@ class Body:
         reset_array=[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
         for i in range(12):
             self.kit.servo[i].angle=reset_array[i]
-    def schedule_move(self,moves,step=5):
-        moves=np.array(moves).astype(np.int16)
-        moves[moves>180]=180
-        moves[moves<0]=0
-        current=np.array([int(self.kit.servo[i].angle) for i in range(self.start,self.num)]).astype(np.int16)
-        diff=moves-current
-        print(moves,"\n",current,"\n",diff)
-        t=time.time()
-        c=0
-        diff[diff<2]=0
-        if int(np.mean(diff))==1:
-            step=1
-        while np.sum(np.abs(diff))!=0:
-            for i in range(self.start,self.num):
-                if self.kit.servo[i].angle+(-step if diff[i-self.start]<0 else step)<=180 and self.kit.servo[i].angle+(-step if diff[i-self.start]<0 else step)>=0:
-                    self.kit.servo[i].angle+= -step if diff[i-self.start]<0 else step
-                    if diff[i-self.start]!=0:
-                        diff[i-self.start] = diff[i-self.start]-step if diff[i-self.start]>0 else diff[i-self.start]+step
+    def schedule_move(self, target_angles, step_size=1, delay=0.01):
+        # Ensure target_angles has an entry for each servo
+        if len(target_angles) != len(self.kit.servo):
+            raise ValueError("Number of target angles must match number of servos.")
+        
+        # Flag to track if any servo still needs to move
+        moving = True
+
+        while moving:
+            moving = False  # Assume all servos have reached their target for this iteration
+
+            for i, target_angle in enumerate(target_angles):
+                current_angle = self.kit.servo[i].angle or 0  # Handle case where angle is None
+
+                # Calculate step direction based on difference
+                if current_angle < target_angle:
+                    new_angle = min(current_angle + step_size, target_angle)
+                    moving = True
+                elif current_angle > target_angle:
+                    new_angle = max(current_angle - step_size, target_angle)
+                    moving = True
                 else:
-                    diff[i-self.start]=0
-            c+=1
-            if c>15 and step!=1: #prevent never finding 0
-                step-=1
-                c=0
+                    new_angle = current_angle  # Servo is already at target
+
+                # Set the new angle
+                self.kit.servo[i].angle = new_angle
+
+            time.sleep(delay)  # Add a delay between steps
+        
             
     def move(self,motors):
         for i in range(self.start,self.num):
