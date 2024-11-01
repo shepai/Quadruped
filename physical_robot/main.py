@@ -14,12 +14,19 @@ foot=I2C_Tactile(i2c)
 start=0
 num=12
 body=Body(i2c,num,start)
-start=[130.0, 140.0, 50.0, 180.0, 180.0, 65.0,110.0, 40.0, 120.0, 30,100,80]
+start=[130.0, 80.0, 50.0, 70.0, 180.0, 65.0,100.0, 70.0, 120.0, 30,100,80]
 start=np.array(start)
 #body.schedule_move(start)
 body.move(start)
+time.sleep(1)
+start+=30
+start[start>180]=180
+body.schedule_move(start,4)
 
-#body.schedule_move(start)
+time.sleep(1)
+start-=60
+start[start<0]=0
+body.schedule_move(start,4)
 print(start.tolist())
 
 print("TESTING SERVOS")
