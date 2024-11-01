@@ -11,7 +11,7 @@ class Body:
         else:
             self.i2c=i2c
             self.kit=ServoKit(channels=16,i2c=self.i2c)
-        start=[130.0, 10.0, 10.0, 180.0, 180.0, 65.0,110.0, 40.0, 120.0, 0,0,80]
+        start=[130.0, 140.0, 50.0, 180.0, 180.0, 65.0,110.0, 40.0, 120.0, 30,100,80]
 
         for i in range(self.start,num):
             self.kit.servo[i].angle=start[i]
