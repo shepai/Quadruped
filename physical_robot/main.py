@@ -14,17 +14,23 @@ foot=I2C_Tactile(i2c)
 start=0
 num=12
 body=Body(i2c,num,start)
-start=[130.0, 40.0, 10.0, 180.0, 180.0, 65.0,110.0, 40.0, 120.0, 0,0,80]
+start=[130.0, 140.0, 50.0, 180.0, 180.0, 65.0,110.0, 40.0, 120.0, 30,100,80]
 start=np.array(start)
 #body.schedule_move(start)
-print(start.tolist())
-start+=30
-start[start>180]=100
-time.sleep(2)
-#body.move(start)
-body.schedule_move(start)
+body.move(start)
+
+#body.schedule_move(start)
 print(start.tolist())
 
+print("TESTING SERVOS")
+
+"""for i in range(12):
+    print("Motor",i)
+    for j in range(40):
+        body.kit.servo[i].angle=40+j
+        time.sleep(0.1)"""
+#1 3 6 7 9 10
+        
 #time.sleep(4)
 #start[0]=90
 #body.schedule_move(start)
