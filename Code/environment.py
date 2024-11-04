@@ -35,16 +35,17 @@ class environment:
         p.setGravity(0, 0, -9.81)
         self.plane_id = p.loadURDF('plane.urdf')
         p.configureDebugVisualizer(p.COV_ENABLE_GUI,0)
-        initial_position = [0, 0, 0.3]  # x=1, y=2, z=0.5
+        initial_position = [0, 0, 5.8]  # x=1, y=2, z=0.5
         initial_orientation = p.getQuaternionFromEuler([0, 0, 0])  # No rotation (Euler angles to quaternion)
         flags = p.URDF_USE_SELF_COLLISION
         self.robot_id = p.loadURDF(path+"Quadruped_prestip.urdf", initial_position, initial_orientation,flags=flags)
+        
+        self.quad=Quadruped.Quadruped(p,self.robot_id,self.plane_id)
+        self.quad.neutral=[-30, 0, 40, -30, 50, -10, 0, 10, 20, 30, -30, 50]
+        self.quad.reset()
         for i in range(100):
             p.stepSimulation()
-            p.setTimeStep(1./24.)
-        self.quad=Quadruped.Quadruped(p,self.robot_id,self.plane_id)
-        self.quad.neutral=[-10,0,30,0,0,0,0,0,0,0,0,0]
-        self.quad.reset()
+            p.setTimeStep(1./240.)
     def runTrial(self,agent,generations,delay=False,fitness=demo):
         self.reset()
         for i in range(generations):
