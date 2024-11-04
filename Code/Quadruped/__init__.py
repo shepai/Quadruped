@@ -6,7 +6,7 @@ class Quadruped:
         self.robot_id =robot_id  #connect to simulation
         self.p=p
         self.motors=[0 for i in range(3*4)] #positions in degrees
-        self.neutral=[0 for i in range(3*4)] #positions in degrees
+        self.neutral=[-30, 0, 40, -30, 50, -10, 0, 10, 20, 30, -30, 50] #positions in degrees
         self.start=self.getPos()
         self.start_orientation=self.getOrientation()[0:3]
         self.floor=floor
