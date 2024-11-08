@@ -14,4 +14,4 @@ def fitness(robot):
     return distance
 
 env=environment(True)
-env.runTrial(population[np.where(fitnesses==np.max(fitnesses))[0][0]],150)
+env.runTrial(population[np.where(fitnesses==np.max(fitnesses))[0][0]],500,delay=1)

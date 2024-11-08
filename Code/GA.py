@@ -1,5 +1,6 @@
 from environment import *
 from CPG import *
+import time
 
 env=environment(0)
 def fitness_(robot):
@@ -12,11 +13,11 @@ def euclidean_distance(point1, point2):
 
 #agent goes in population generation
 #initial
-population_size=50
+population_size=200
 population=[CPG(6) for _ in range(population_size)]#np.random.choice([50, 20, 0,0,0,0,-20],(150,15,12)) #12 motors, 15 steps
 fitnesses=np.zeros((population_size,))
-generations=1000
-
+generations=50000
+t_start=time.time()
 #get fitnesses
 for i in range(len(fitnesses)):
     fitnesses[i]=env.runTrial(population[i],200,delay=0,fitness=fitness_)
@@ -28,16 +29,16 @@ for gen in range(generations):
     ind1=np.random.randint(0,len(fitnesses)-1)
     ind2=np.random.randint(0,len(fitnesses)-1)
     geno=population[ind1]
-    f=env.runTrial(geno,100,delay=False,fitness=fitness_) #run trial
+    f=env.runTrial(geno,500,delay=False,fitness=fitness_) #run trial
     if f>fitnesses[ind2]: #selection
         mutated=deepcopy(geno)
         mutated.mutate()
-        fitnesses[ind2]=env.runTrial(mutated,200,delay=False,fitness=fitness_)
+        fitnesses[ind2]=env.runTrial(mutated,500,delay=False,fitness=fitness_)
         population[ind2]=mutated
     else:
         mutated=deepcopy(geno)
         mutated.mutate()
-        fitnesses[ind1]=env.runTrial(mutated,200,delay=False,fitness=fitness_)
+        fitnesses[ind1]=env.runTrial(mutated,500,delay=False,fitness=fitness_)
         population[ind1]=mutated
     #if gen%10==0:
         #runTrial(population[np.where(fitnesses==np.max(fitnesses))[0][0]],150)
@@ -51,3 +52,7 @@ p.disconnect()
 p.connect(p.GUI)
 env.runTrial(population[np.where(fitnesses==np.max(fitnesses))[0][0]],150)
 p.disconnect()
+
+
+t_passed=time.time()-t_start
+print("********************************\n\n\n\nTIME IT TOOK:",t_passed/(60*60),"Hours")
