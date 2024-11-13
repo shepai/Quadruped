@@ -20,7 +20,7 @@ except:
 def demo(variable):
     return 0
 class environment:
-    def __init__(self,show=False):
+    def __init__(self,show=False,record=False,filename=""):
         self.show=show
         if show: p.connect(p.GUI)
         else: p.connect(p.DIRECT)
@@ -30,6 +30,10 @@ class environment:
         self.robot_id=None
         self.plane_id=None
         self.quad=None
+        self.record=record
+        self.filename=filename
+        self.recording=0
+        
     def reset(self):
         p.resetSimulation()
         p.setGravity(0, 0, -9.81)
@@ -46,6 +50,9 @@ class environment:
         for i in range(500):
             p.stepSimulation()
             p.setTimeStep(1./240.)
+        if self.record:
+            self.video_log_id = p.startStateLogging(p.STATE_LOGGING_VIDEO_MP4, self.filename)
+            self.recording=1
     def runTrial(self,agent,generations,delay=False,fitness=demo):
         self.reset()
         for i in range(generations):
@@ -62,10 +69,14 @@ class environment:
             if self.quad.hasFallen():
                 break
         return fitness(self.quad)
+    def stop(self):
+        if self.recording and self.record:
+            p.stopStateLogging(self.video_log_id)
+            self.recording=0
 
 class GYM(gym.Env):
     metadata = {"render_modes": ["human"], "render_fps": 30}
-    def __init__(self,show=True):
+    def __init__(self,show=True,record=False,filename=""):
         super(GYM, self).__init__()
         if show: p.connect(p.GUI)
         else: p.connect(p.DIRECT)
@@ -91,6 +102,9 @@ class GYM(gym.Env):
         self.robot_position=self.quad.getPos()
         self.observation_space=spaces.Box(low= -10, high = 300, shape = (20,), dtype = np.float32)#spaces.Discrete(9)
         self.start_position=self.quad.start
+        self.record=record
+        self.recording=0
+        self.filename=filename
     def step(self,action):
         self.quad.setPositions(np.degrees(action))
         for i in range(50):
@@ -134,8 +148,14 @@ class GYM(gym.Env):
         self.quad.reset()
         curr=self.quad.getPos()
         self.observation_space = np.zeros((20,), dtype=np.float32)
+        if self.record:
+            self.video_log_id = self.p.startStateLogging(self.p.STATE_LOGGING_VIDEO_MP4, self.filename)
+            self.recording=1
         return self.observation_space
     def close(self):
+        if self.recording and self.record:
+            self.p.stopStateLogging(self.video_log_id)
+            self.recording=0
         self.p.removeBody(self.robot_id)
         del self.quad
     def render(self, mode='human'):
