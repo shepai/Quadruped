@@ -43,7 +43,7 @@ class environment:
         self.quad=Quadruped.Quadruped(p,self.robot_id,self.plane_id)
         self.quad.neutral=[-30, 0, 40, -30, 50, -10, 0, 10, 20, 30, -30, 50]
         self.quad.reset()
-        for i in range(100):
+        for i in range(500):
             p.stepSimulation()
             p.setTimeStep(1./240.)
     def runTrial(self,agent,generations,delay=False,fitness=demo):
