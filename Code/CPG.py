@@ -59,9 +59,9 @@ class CPG(agent):
     def get_positions(self,inputs):
         positions=[]
         Inputs=np.zeros((self.num_neurons))
-        Inputs[0]+=inputs[0] #add proprioception
-        Inputs[1]+=inputs[1]
-        Inputs[2]+=inputs[2]
+        #Inputs[0]+=inputs[0] #add proprioception
+        #Inputs[1]+=inputs[1]
+        #Inputs[2]+=inputs[2]
         for cpg in self.body:
             out=cpg.forward(I=Inputs) #forward
             Inputs=out
@@ -69,12 +69,13 @@ class CPG(agent):
             Inputs[1]+=inputs[1]
             Inputs[2]+=inputs[2]
             #Inputs=self.cpg.sigma(Inputs)*15
-            Inputs[Inputs<-40]=-40
+            Inputs[Inputs<-0]=-0
             Inputs[Inputs>40]=40
             positions.append(Inputs[0]) #select neuron outputs as proportional to motor
             positions.append(Inputs[1])
             positions.append(Inputs[2])
-        
+
+        #print(np.degrees(np.array(positions))/5)
         return np.array(positions)
     def set_genotype(self, values):
         self.cpg.weights=values[0:len(self.cpg.weights.flatten())].reshape(self.cpg.weights.shape)
@@ -87,10 +88,78 @@ class CPG(agent):
         self.populateBody()
         return super().set_genotype(np.concatenate([self.cpg.weights.flatten(),self.cpg.b.flatten(),self.cpg.Tau.flatten()]))
     
+class Pattern:
+    def __init__(self,a,h,b,k):
+        self.geno=np.array([a,h,b,k])
+    def forward(self,t):
+        g=self.geno
+        return g[0] * np.sin((t-g[1])/g[2]) +g[3]
 
+class generator(agent):
+    def __init__(self):
+        agent.__init__(self)
+        g1=np.random.normal(0,1,(4))
+        g2=np.random.normal(0,1,(4))
+        hips=np.random.normal(0,1,(4))
+        phase=np.array([np.random.randint(0,100) for i in range(4)])
+        self.leg=Pattern(*g1)
+        self.knee=Pattern(*g2)
+        self.hip=Pattern(*hips)
+        self.geno=np.concatenate([phase,g1,g2,hips])
+        self.val=0
+    def get_positions(self,inputs):
+        positions=[]
+        #Inputs[0]+=inputs[0] #add proprioception
+        #Inputs[1]+=inputs[1]
+        #Inputs[2]+=inputs[2]
+        for i in range(4):
+            phase=self.geno[i]
+            hip=self.hip.forward(self.val+phase) #forward
+            leg=self.leg.forward(self.val+phase) #forward
+            knee=self.knee.forward(self.val+phase) #forward
+            positions.append(hip)
+            positions.append(leg)
+            positions.append(knee)
+        self.val+=1
+        #print(np.degrees(np.array(positions))/5)
+        positions=np.array(positions)/1.5
+        positions[positions<0]=0
+        positions[positions>180]=180
+        return np.degrees(positions)
+    def set_genotype(self,val):
+        #mutate instead
+        self.geno=val.copy()
+        self.leg=Pattern(*self.geno[4:8])
+        self.knee=Pattern(*self.geno[8:12])
+        self.hip=Pattern(*self.geno[12:16])
+        self.val=0
+    def mutate(self):
+        phase=np.array([np.random.randint(-50,50) for i in range(4)])
+        self.geno[0:4]+=phase
+        self.geno[0:4][self.geno[0:4]>100]=100
+        self.geno[0:4][self.geno[0:4]<0]=0
+        self.geno[4:]+=np.random.normal(0,1,self.geno[4:].shape)
 if __name__ == "__main__":
-    from environment import *
+    """from environment import *
     env=environment(True)
-    agent=CPG(6)
-    env.runTrial(agent,1000,True)
+    agent=CPG(3)
+    env.runTrial(agent,1000,True)"""
+    gen=generator()
+    import matplotlib.pyplot as plt
+    import matplotlib
+    matplotlib.use('TkAgg')
+    positions=[]
+    for i in range(100):
+        pos=gen.get_positions(0)
+        positions.append(pos)
+    positions=np.array(positions)
+    print(positions)
+    c=["b","r","g","b","r","g","b","r","g","b","r","g"]
+    label=["hip1","knee1","foot1","hip2","knee2","foot2","hip3","knee3","foot3","hip4","knee4","foot4"]
+    for i in range(12):
+        plt.plot(positions[:,i],c=c[i],label=label[i])
+    plt.legend(loc="upper right")
+    plt.show()
+
+
 
