@@ -94,6 +94,8 @@ class Pattern:
     def forward(self,t):
         g=self.geno
         return g[0] * np.sin((t-g[1])/g[2]) +g[3]
+    def set_param(self,a,h,b,k):
+        self.geno=np.array([a,h,b,k])
 
 class generator(agent):
     def __init__(self):
@@ -114,9 +116,9 @@ class generator(agent):
         #Inputs[2]+=inputs[2]
         for i in range(4):
             phase=self.geno[i]
-            hip=self.hip.forward(self.val+phase) #forward
-            leg=self.leg.forward(self.val+phase) #forward
-            knee=self.knee.forward(self.val+phase) #forward
+            hip=self.hip.forward(phase+self.val) #forward
+            leg=self.leg.forward(phase+self.val) #forward
+            knee=self.knee.forward(phase+self.val) #forward
             positions.append(hip)
             positions.append(leg)
             positions.append(knee)
@@ -139,15 +141,61 @@ class generator(agent):
         self.geno[0:4][self.geno[0:4]>100]=100
         self.geno[0:4][self.geno[0:4]<0]=0
         self.geno[4:]+=np.random.normal(0,1,self.geno[4:].shape)
+
+class NN:
+    def __init__(self,inp,hidden):
+        out=16
+        self.fc1=np.random.random((inp,hidden))
+        self.b1=np.random.random((1,hidden))
+        self.fc2=np.random.random((hidden,out))
+        self.b2=np.random.random((1,out))
+        self.genotype=np.concatenate([self.fc1.flatten(),self.b1.flatten(),self.fc2.flatten(),self.b2.flatten()])
+        self.sig=Pattern(0,0,0,0)
+        self.val=0
+    def sigmoid(self,x):
+        return 1 / (1 + np.exp(-x))
+    def forward(self,X):
+        x=self.sigmoid(np.dot(X,self.fc1))+self.b1
+        x=np.dot(x,self.fc2)+self.b2
+        return x
+    def get_positions(self,x):
+        x=self.forward(x)[0]
+        positions=np.zeros(12,)
+        for j,i in enumerate(range(0,12,3)): #loop through legs assigning phase encoding
+            self.sig.set_param(*x[0:4])
+            positions[i]=self.sig.forward(x[j]+self.val)
+            self.sig.set_param(*x[4:8])
+            positions[i+1]=self.sig.forward(x[j]+self.val)
+            self.sig.set_param(*x[8:12])
+            positions[i+2]=self.sig.forward(x[j]+self.val)
+        self.val+=1
+        positions[positions<0]=0
+        positions[positions>30]=30
+        return positions
+    def set_genotype(self,geno):
+        self.genotype=geno.copy()
+        self.genotype[self.genotype>5]=5
+        self.genotype[self.genotype<-5]=-5
+        self.fc1=self.genotype[0:len(self.fc1.flatten())].reshape(self.fc1.shape)
+        idx=len(self.fc1.flatten())
+        self.b1=self.genotype[idx:idx+len(self.b1.flatten())].reshape(self.b1.shape)
+        idx+=len(self.b1.flatten())
+        self.fc2=self.genotype[idx:idx+len(self.fc2.flatten())].reshape(self.fc2.shape)
+        idx+=len(self.fc2.flatten())
+        self.b2=self.genotype[idx:idx+len(self.b2.flatten())].reshape(self.b2.shape)
+    def mutate(self):
+        self.set_genotype(self.genotype+np.random.normal(0,2,self.genotype.shape))
+
 if __name__ == "__main__":
+    import matplotlib.pyplot as plt
+    import matplotlib
+    matplotlib.use('TkAgg')
     """from environment import *
     env=environment(True)
     agent=CPG(3)
     env.runTrial(agent,1000,True)"""
-    gen=generator()
-    import matplotlib.pyplot as plt
-    import matplotlib
-    matplotlib.use('TkAgg')
+    """gen=generator()
+    
     positions=[]
     for i in range(100):
         pos=gen.get_positions(0)
@@ -159,7 +207,15 @@ if __name__ == "__main__":
     for i in range(12):
         plt.plot(positions[:,i],c=c[i],label=label[i])
     plt.legend(loc="upper right")
+    plt.show()"""
+    n=NN(10,20)
+    n.set_genotype(np.random.random(n.genotype.shape))
+    motors=[]
+    for i in range(300):
+        motors.append(n.get_positions(np.zeros((1,10))))
+    plt.plot(np.array(motors))
     plt.show()
+    
 
 
 
