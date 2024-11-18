@@ -157,8 +157,11 @@ class NN:
     def forward(self,X):
         x=self.sigmoid(np.dot(X,self.fc1))+self.b1
         x=np.dot(x,self.fc2)+self.b2
-        return x
-    def get_positions(self,x):
+        return x/3
+    def get_positions(self,x,motors=0):
+        x=np.array(x)
+        if len(x.shape)<2:
+            x=x.reshape((1,len(x)))
         x=self.forward(x)[0]
         positions=np.zeros(12,)
         for j,i in enumerate(range(0,12,3)): #loop through legs assigning phase encoding
@@ -169,13 +172,14 @@ class NN:
             self.sig.set_param(*x[8:12])
             positions[i+2]=self.sig.forward(x[j]+self.val)
         self.val+=1
+        positions=motors+positions
         positions[positions<0]=0
-        positions[positions>30]=30
+        positions[positions>50]=30
         return positions
     def set_genotype(self,geno):
         self.genotype=geno.copy()
-        self.genotype[self.genotype>5]=5
-        self.genotype[self.genotype<-5]=-5
+        #self.genotype[self.genotype>10]=10
+        #self.genotype[self.genotype<-10]=-10
         self.fc1=self.genotype[0:len(self.fc1.flatten())].reshape(self.fc1.shape)
         idx=len(self.fc1.flatten())
         self.b1=self.genotype[idx:idx+len(self.b1.flatten())].reshape(self.b1.shape)
