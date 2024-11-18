@@ -1,7 +1,7 @@
 from environment import *
 from CPG import *
 import time
-
+from copy import deepcopy
 env=environment(0)
 def fitness_(robot):
     positions=np.array(robot.positions)
@@ -38,12 +38,12 @@ for gen in range(generations):
         mutated=deepcopy(geno)
         mutated.mutate()
         fitnesses[ind2]=env.runTrial(mutated,500,delay=False,fitness=fitness_)
-        population[ind2]=mutated
+        population[ind2]=deepcopy(mutated)
     else:
         mutated=deepcopy(geno)
         mutated.mutate()
         fitnesses[ind1]=env.runTrial(mutated,500,delay=False,fitness=fitness_)
-        population[ind1]=mutated
+        population[ind1]=deepcopy(mutated)
     #if gen%10==0:
         #runTrial(population[np.where(fitnesses==np.max(fitnesses))[0][0]],150)
 #play the trials on reapeat
