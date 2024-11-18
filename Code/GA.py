@@ -4,12 +4,16 @@ import time
 
 env=environment(0)
 def fitness_(robot):
-    distance = (euclidean_distance(robot.getPos()[0:2],robot.start[0:2])*0.8 - euclidean_distance(robot.start_orientation,robot.getOrientation())*0.1)-robot.get_self_collision_count()*0.01
-    if distance<0: distance=0
+    positions=np.array(robot.positions)
+    shift=positions[1:]
+    shift_=positions[:-1]
+    distanceA = euclidean_distance(np.array(robot.getPos()[0:2]).reshape((1,2)),np.array(robot.start[0:2]).reshape((1,2))) #*0.8 - euclidean_distance(robot.start_orientation,robot.getOrientation())*0.1)#-robot.get_self_collision_count()*0.01
+    #if distance<0: distance=0
+    distance=np.sum(euclidean_distance(shift,shift_))*distanceA
     if robot.hasFallen(): return 0
     return distance
 def euclidean_distance(point1, point2):
-    return np.sqrt(np.sum((np.array(point1) - np.array(point2)) ** 2))
+    return np.sqrt(np.sum((np.array(point1) - np.array(point2)) ** 2,axis=1))
 
 #agent goes in population generation
 #initial
