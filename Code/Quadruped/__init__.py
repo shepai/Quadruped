@@ -10,7 +10,9 @@ class Quadruped:
         self.start=self.getPos()
         self.start_orientation=self.getOrientation()[0:3]
         self.floor=floor
+        self.positions=[]
     def reset(self):
+        self.positions=[]
         for joint_index in range(12): 
             self.p.setJointMotorControl2(
                 bodyUniqueId=self.robot_id,
@@ -27,6 +29,8 @@ class Quadruped:
                 controlMode=self.p.POSITION_CONTROL,
                 targetPosition=maths.radians(self.motors[i])
             ) 
+        x,y,z=self.getPos()
+        self.positions.append([x,y,z])
     def getPos(self):
         position, orientation = self.p.getBasePositionAndOrientation(self.robot_id)
         # Extract the x, y, z position
