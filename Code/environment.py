@@ -56,7 +56,7 @@ class environment:
     def runTrial(self,agent,generations,delay=False,fitness=demo):
         self.reset()
         for i in range(generations):
-            motor_positions=agent.get_positions(self.quad.motors)
+            motor_positions=agent.get_positions(self.quad.motors,motors=self.quad.motors)
             self.quad.setPositions(motor_positions)
             for k in range(10): #update simulation
                 p.stepSimulation()
@@ -76,7 +76,7 @@ class environment:
 
 class GYM(gym.Env):
     metadata = {"render_modes": ["human"], "render_fps": 30}
-    def __init__(self,show=True,record=False,filename=""):
+    def __init__(self,show=True,record=False,filename="",delay=False):
         super(GYM, self).__init__()
         if show: p.connect(p.GUI)
         else: p.connect(p.DIRECT)
@@ -94,32 +94,37 @@ class GYM(gym.Env):
         self.id = self.p.loadURDF(path+"Quadruped_prestip.urdf", initial_position, initial_orientation,flags=flags)
         self.view=show
         self.quad=Quadruped.Quadruped(self.p,self.id,self.plane_id)
-        self.quad.neutral=[-10,0,30,0,0,0,0,0,0,0,0,0]
+        self.quad.neutral=[-30, 0, 40, -30, 50, -10, 0, 10, 20, 30, -30, 50]
         self.quad.reset()
         self.robot_id=id
         self.p=p
         self.action_space = spaces.Box(low= -0.1, high = 1, shape = (12,), dtype = np.float32)
         self.robot_position=self.quad.getPos()
-        self.observation_space=spaces.Box(low= -10, high = 300, shape = (20,), dtype = np.float32)#spaces.Discrete(9)
+        self.observation_space=spaces.Box(low= -10, high = 300, shape = self.observation().shape, dtype = np.float32)#spaces.Discrete(9)
         self.start_position=self.quad.start
         self.record=record
         self.recording=0
+        self.delay=delay
         self.filename=filename
     def step(self,action):
-        self.quad.setPositions(np.degrees(action))
+        self.quad.setPositions(action)
         for i in range(50):
             p.stepSimulation()
-            p.setTimeStep(1./240.)
+            if self.delay:
+                time.sleep(1./240.)
+            else:
+                p.setTimeStep(1./240.)
             #time.sleep(1/240.)
         orientation = self.quad.getOrientation()
         foot_pressure = self.quad.getFeet()
         curr=self.quad.getPos()
         preshape=self.observation_space
-        self.observation_space = np.array(np.concatenate([foot_pressure, orientation,self.quad.motors]), dtype = np.float32).reshape((20,))
+        self.observation_space = np.array(np.concatenate([foot_pressure, orientation,self.quad.motors]), dtype = np.float32).flatten()
+
         #self.observation_space[self.observation_space<0]=0
 
         distance_moved = curr[0]- self.start_position[0]  # Forward movement in x-direction
-        reward = 10 * distance_moved - np.abs(curr[1])  # Penalize deviation from straight line
+        reward = 10 * distance_moved - np.abs(curr[1]-self.start_position[1])  # Penalize deviation from straight line
         if self.view:
             basePos, baseOrn = p.getBasePositionAndOrientation(self.id) # Get model position
             self.p.resetDebugVisualizerCamera( cameraDistance=0.3, cameraYaw=75, cameraPitch=-20, cameraTargetPosition=basePos) # fix camera onto model
@@ -130,7 +135,7 @@ class GYM(gym.Env):
     def observation(self):
         orientation = self.quad.getOrientation()
         foot_pressure = self.quad.getFeet()
-        return np.concatenate([foot_pressure, orientation,self.quad.motors])
+        return np.concatenate([foot_pressure, orientation,self.quad.motors], dtype = np.float32).flatten()
     def reset(self):
         self.p.removeBody(self.id)
         del self.quad
@@ -144,10 +149,10 @@ class GYM(gym.Env):
         self.id = self.p.loadURDF(path+"Quadruped_prestip.urdf", initial_position, initial_orientation,flags=flags)
         
         self.quad=Quadruped.Quadruped(self.p,self.id,self.plane_id)
-        self.quad.neutral=[-10,0,30,0,0,0,0,0,0,0,0,0]
+        self.quad.neutral=[-30, 0, 40, -30, 50, -10, 0, 10, 20, 30, -30, 50]
         self.quad.reset()
         curr=self.quad.getPos()
-        self.observation_space = np.zeros((20,), dtype=np.float32)
+        self.observation_space = np.zeros(self.observation_space.shape, dtype=np.float32)
         if self.record:
             self.video_log_id = self.p.startStateLogging(self.p.STATE_LOGGING_VIDEO_MP4, self.filename)
             self.recording=1

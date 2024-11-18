@@ -1,39 +1,57 @@
 path="C:/Users/dexte/Documents/GitHub/Quadruped/Quadruped_sim/urdf/"
 path="/its/home/drs25/Documents/GitHub/Quadruped/Quadruped_sim/urdf/"
 import pybullet as p
-import pybullet_data
 import numpy as np
-from stable_baselines3.common.env_checker import check_env
-import gym
-from gym import spaces
 from stable_baselines3 import PPO
-import time
 from environment import *
-def euclidean_distance(point1, point2):
-    return np.sqrt(np.sum((np.array(point1) - np.array(point2)) ** 2))
+from CPG import NN
 
-# Reconnect to PyBullet in GUI mode
-p.connect(p.GUI)  
-p.setAdditionalSearchPath(pybullet_data.getDataPath())
+class NNPolicy:
+    def __init__(self, input_size, hidden_size,env):
+        self.nn = NN(inp=input_size, hidden=hidden_size)
+        self.env=env
 
-# Initialize the environment
-env = GYM()
+    def predict(self, observation):
+        # Forward pass to generate action
+        action = self.nn.get_positions(observation,motors=self.env.quad.motors)
+        return action
+    def save(self, filepath):
+        """Save the current genotype to a file."""
+        os.makedirs(os.path.dirname(filepath), exist_ok=True)
+        np.save(filepath, self.nn.genotype)
+        print(f"Policy saved to {filepath}")
 
-# Load the previously saved model
-model = PPO.load("/its/home/drs25/Documents/GitHub/Quadruped/ppo_quadruped_model.zip")
+    def load(self, filepath):
+        """Load the genotype from a file."""
+        if os.path.exists(filepath):
+            genotype = np.load(filepath)
+            self.nn.set_genotype(genotype)
+            print(f"Policy loaded from {filepath}")
+        else:
+            print(f"File {filepath} not found!")
 
-# Reset the environment
-obs = env.reset()
+# Main script
+if __name__ == "__main__":
+    # Initialize PyBullet
 
-# Run the trained model and visualize it
-for _ in range(1000):
-    action, _states = model.predict(obs)
-    obs, rewards, done, info = env.step(action)
-    env.render()
+    # Initialize environment and custom policy
+    env = GYM(1,delay=1)
+    input_size = env.observation_space.shape[0]  # Assuming environment provides observation_space
+    hidden_size = 32  # Arbitrary choice; adjust as needed
+    policy = NNPolicy(input_size=input_size, hidden_size=hidden_size,env=env)
+
+    # Optionally load a saved policy
+    save_path = "/its/home/drs25/Documents/GitHub/Quadruped/my_quadruped_model"
+    try:
+        policy.load(save_path)
+    except FileNotFoundError:
+        print("No saved policy found. Starting training from scratch.")
     
-    # Reset the environment if done
-    if done:
-        obs = env.reset()
-
-# Close the PyBullet simulation
-p.disconnect()
+    # Test the trained policy
+    obs = env.reset()
+    for _ in range(1000):
+        action = policy.predict(obs)
+        obs, rewards, done, info = env.step(action)
+        env.render()
+        if done:
+            obs = env.reset()
