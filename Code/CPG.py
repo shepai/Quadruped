@@ -1,6 +1,10 @@
 import numpy as np
 from copy import deepcopy
 from agent import *
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+
 class Network:
     def __init__(self, num, std=0.1):
         self.num = num
@@ -90,12 +94,12 @@ class CPG(agent):
     
 class Pattern:
     def __init__(self,a,h,b,k):
-        self.geno=np.array([a,h,b,k])
+        self.geno=torch.tensor([a,h,b,k])
     def forward(self,t):
         g=self.geno
-        return g[0] * np.sin((t-g[1])/g[2]) +g[3]
+        return g[0] * torch.sin((t-g[1])/g[2]) +g[3]
     def set_param(self,a,h,b,k):
-        self.geno=np.array([a,h,b,k])
+        self.geno=torch.tensor([a,h,b,k])
 
 class generator(agent):
     def __init__(self):
@@ -142,53 +146,79 @@ class generator(agent):
         self.geno[0:4][self.geno[0:4]<0]=0
         self.geno[4:]+=np.random.normal(0,1,self.geno[4:].shape)
 
-class NN:
-    def __init__(self,inp,hidden):
-        out=16
-        self.fc1=np.random.random((inp,hidden))
-        self.b1=np.random.random((1,hidden))
-        self.fc2=np.random.random((hidden,out))
-        self.b2=np.random.random((1,out))
-        self.genotype=np.concatenate([self.fc1.flatten(),self.b1.flatten(),self.fc2.flatten(),self.b2.flatten()])
-        self.sig=Pattern(0,0,0,0)
-        self.val=0
-    def sigmoid(self,x):
-        return 1 / (1 + np.exp(-x))
-    def forward(self,X):
-        x=self.sigmoid(np.dot(X,self.fc1))+self.b1
-        x=np.dot(x,self.fc2)+self.b2
-        return x/3
-    def get_positions(self,x,motors=0):
-        x=np.array(x)
-        if len(x.shape)<2:
-            x=x.reshape((1,len(x)))
-        x=self.forward(x)[0]
-        positions=np.zeros(12,)
-        for j,i in enumerate(range(0,12,3)): #loop through legs assigning phase encoding
+import torch
+import torch.nn as nn
+import numpy as np
+
+class NN(nn.Module):
+    def __init__(self, inp, hidden,env=0):
+        super(NN, self).__init__()
+        out = 16  # Output size
+        self.fc1 = nn.Linear(inp, hidden)  # Fully connected layer 1
+        self.fc2 = nn.Linear(hidden, out)  # Fully connected layer 2
+        self.genotype = self._get_genotype()  # Flattened parameter array
+        self.sig = Pattern(0, 0, 0, 0)  # External object, assumed defined elsewhere
+        self.val = 0  # Keeps track of the step for position encoding
+
+    def _get_genotype(self):
+        """Flatten all model parameters into a single array."""
+        with torch.no_grad():
+            params = []
+            for param in self.parameters():
+                params.append(param.view(-1).cpu().numpy())
+            return np.concatenate(params)
+
+    def _set_genotype(self, genotype):
+        """Set model parameters from a flattened array."""
+        with torch.no_grad():
+            idx = 0
+            for param in self.parameters():
+                numel = param.numel()
+                param.copy_(torch.tensor(genotype[idx:idx + numel]).view(param.shape))
+                idx += numel
+
+    def forward(self, X):
+        """Forward pass through the network."""
+        x = torch.sigmoid(self.fc1(X))  # Apply sigmoid activation
+        x = self.fc2(x)  # Pass through the second layer
+        self.cache = {'X': X, 'hidden': x}  # Cache for backpropagation
+        return x / 3  # Scale the output
+    def forward_positions(self,x,motors=0):
+        positions = np.zeros(12)
+        for j, i in enumerate(range(0, 12, 3)):  # Loop through legs assigning phase encoding
             self.sig.set_param(*x[0:4])
-            positions[i]=self.sig.forward(x[j]+self.val)
+            positions[i] = self.sig.forward(x[j] + self.val)
             self.sig.set_param(*x[4:8])
-            positions[i+1]=self.sig.forward(x[j]+self.val)
+            positions[i + 1] = self.sig.forward(x[j] + self.val)
             self.sig.set_param(*x[8:12])
-            positions[i+2]=self.sig.forward(x[j]+self.val)
-        self.val+=1
-        positions=motors+positions
-        positions[positions<0]=0
-        positions[positions>50]=30
+            positions[i + 2] = self.sig.forward(x[j] + self.val)
+        
+        self.val += 1
+        positions = motors + positions
+        positions[positions < 0] = 0
+        positions[positions > 50] = 30
+        return torch.tensor(positions)
+    def get_positions(self, x, motors=0):
+        """Generate positions for the robot's motors."""
+        if motors is None:
+            motors = torch.zeros(12)  # Default to zeros if not provided
+
+        if len(x.shape) < 2:
+            x = x.unsqueeze(0)  # Ensure input is 2D for batch processing
+
+        x = self.forward(x)[0]  # Process input and convert to numpy
+        positions=self.forward_positions(x)
         return positions
-    def set_genotype(self,geno):
-        self.genotype=geno.copy()
-        #self.genotype[self.genotype>10]=10
-        #self.genotype[self.genotype<-10]=-10
-        self.fc1=self.genotype[0:len(self.fc1.flatten())].reshape(self.fc1.shape)
-        idx=len(self.fc1.flatten())
-        self.b1=self.genotype[idx:idx+len(self.b1.flatten())].reshape(self.b1.shape)
-        idx+=len(self.b1.flatten())
-        self.fc2=self.genotype[idx:idx+len(self.fc2.flatten())].reshape(self.fc2.shape)
-        idx+=len(self.fc2.flatten())
-        self.b2=self.genotype[idx:idx+len(self.b2.flatten())].reshape(self.b2.shape)
-    def mutate(self):
-        self.set_genotype(self.genotype+np.random.normal(0,2,self.genotype.shape))
+
+    def set_genotype(self, genotype):
+        """Set genotype and update model parameters."""
+        self.genotype = genotype
+        self._set_genotype(self.genotype)
+
+    def mutate(self, std=2.0):
+        """Mutate the model's parameters by adding noise."""
+        mutated_genotype = self.genotype + np.random.normal(0, std, self.genotype.shape)
+        self.set_genotype(mutated_genotype)
 
 if __name__ == "__main__":
     import matplotlib.pyplot as plt
@@ -213,10 +243,10 @@ if __name__ == "__main__":
     plt.legend(loc="upper right")
     plt.show()"""
     n=NN(10,20)
-    n.set_genotype(np.random.random(n.genotype.shape))
+    n.set_genotype(torch.rand(n.genotype.shape))
     motors=[]
     for i in range(300):
-        motors.append(n.get_positions(np.zeros((1,10))))
+        motors.append(n.get_positions(torch.zeros((1,10))).detach().numpy())
     plt.plot(np.array(motors))
     plt.show()
     

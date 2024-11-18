@@ -17,6 +17,7 @@ except:
     import gymnasium as gym
     from gymnasium import spaces
     from stable_baselines3 import PPO, A2C
+import torch
 def demo(variable):
     return 0
 class environment:
@@ -98,9 +99,9 @@ class GYM(gym.Env):
         self.quad.reset()
         self.robot_id=id
         self.p=p
-        self.action_space = spaces.Box(low= -0.1, high = 1, shape = (12,), dtype = np.float32)
+        self.action_space = spaces.Box(low= -0.1, high = 1, shape = (12,),dtype=np.float32)
         self.robot_position=self.quad.getPos()
-        self.observation_space=spaces.Box(low= -10, high = 300, shape = self.observation().shape, dtype = np.float32)#spaces.Discrete(9)
+        self.observation_space=spaces.Box(low= -10, high = 300, shape = self.observation().shape,dtype=np.float32)#spaces.Discrete(9)
         self.start_position=self.quad.start
         self.record=record
         self.recording=0
@@ -119,7 +120,7 @@ class GYM(gym.Env):
         foot_pressure = self.quad.getFeet()
         curr=self.quad.getPos()
         preshape=self.observation_space
-        self.observation_space = np.array(np.concatenate([foot_pressure, orientation,self.quad.motors]), dtype = np.float32).flatten()
+        self.observation_space = torch.tensor(np.concatenate([foot_pressure, orientation,self.quad.motors])).flatten().to(torch.float32)
 
         #self.observation_space[self.observation_space<0]=0
 
@@ -135,7 +136,7 @@ class GYM(gym.Env):
     def observation(self):
         orientation = self.quad.getOrientation()
         foot_pressure = self.quad.getFeet()
-        return np.concatenate([foot_pressure, orientation,self.quad.motors], dtype = np.float32).flatten()
+        return torch.tensor(np.concatenate([foot_pressure, orientation,self.quad.motors]).flatten()).to(torch.float32)
     def reset(self):
         self.p.removeBody(self.id)
         del self.quad
@@ -152,7 +153,7 @@ class GYM(gym.Env):
         self.quad.neutral=[-30, 0, 40, -30, 50, -10, 0, 10, 20, 30, -30, 50]
         self.quad.reset()
         curr=self.quad.getPos()
-        self.observation_space = np.zeros(self.observation_space.shape, dtype=np.float32)
+        self.observation_space = torch.tensor(np.zeros(self.observation_space.shape)).to(torch.float32)
         if self.record:
             self.video_log_id = self.p.startStateLogging(self.p.STATE_LOGGING_VIDEO_MP4, self.filename)
             self.recording=1
