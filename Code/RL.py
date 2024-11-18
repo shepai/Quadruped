@@ -7,67 +7,56 @@ import numpy as np
 from environment import GYM  # Your custom GYM environment
 import time
 import os
+import torch
+def loss_function(predictions, rewards):
+    # Example: Mean squared error loss
+    return torch.mean((predictions - rewards) ** 2)
 
-# Define the custom NN-based policy class
-class NNPolicy:
-    def __init__(self, input_size, hidden_size,env):
-        self.nn = NN(inp=input_size, hidden=hidden_size)
-        self.env=env
+import torch
+import torch.optim as optim
+import torch.nn.functional as F
 
-    def predict(self, observation):
-        # Forward pass to generate action
-        action = self.nn.get_positions(observation,motors=self.env.quad.motors)
-        return action
-    def save(self, filepath):
-        """Save the current genotype to a file."""
-        os.makedirs(os.path.dirname(filepath), exist_ok=True)
-        np.save(filepath, self.nn.genotype)
-        print(f"Policy saved to {filepath}")
-
-    def load(self, filepath):
-        """Load the genotype from a file."""
-        if os.path.exists(filepath):
-            genotype = np.load(filepath)
-            self.nn.set_genotype(genotype)
-            print(f"Policy loaded from {filepath}")
-        else:
-            print(f"File {filepath} not found!")
-
-# Define a basic training loop for the NN-based policy
-def train_policy(env, policy, episodes=1000, max_steps=1000, mutation_rate=0.1):
-    best_genotype = policy.nn.genotype.copy()
-    best_reward = float('-inf')
+def train_policy(env, policy, episodes=1000, max_steps=1000, learning_rate=1e-2):
+    # Define optimizer
+    optimizer = optim.SGD(policy.parameters(), lr=learning_rate)
     rewards_history = []
 
     for episode in range(episodes):
-        total_reward = 0
         obs = env.reset()
-        done = False
+        total_reward = 0
 
         for step in range(max_steps):
-            if done:
-                break
+            # Convert observation to tensor
+            obs_tensor = torch.tensor(obs, dtype=torch.float32)
 
-            # Predict action using NNPolicy
-            action = policy.predict(obs)
-            obs, reward, done, info = env.step(action)
+            # Forward pass through the policy
+            action = policy(obs_tensor)
+            motors = policy.forward_positions(action, torch.tensor(env.quad.motors))
+
+            # Take a step in the environment
+            next_obs, reward, done, _ = env.step(motors)
             total_reward += reward
 
-        # Evaluate and adjust NN genotype
-        if total_reward > best_reward:
-            best_reward = total_reward
-            best_genotype = policy.nn.genotype.copy()
-        else:
-            # Apply mutation
-            policy.nn.mutate()
+            # Convert reward to tensor for loss computation
+            reward_tensor = torch.tensor(reward, dtype=torch.float32)
 
-        # Update the genotype with the best so far
-        policy.nn.set_genotype(best_genotype)
+            # Compute loss
+            loss = F.mse_loss(action, reward_tensor)
+
+            # Zero gradients, backpropagate, and update
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
+
+            if done:
+                break
+            obs = next_obs
+
         rewards_history.append(total_reward)
-
-        print(f"Episode {episode + 1}/{episodes}, Reward: {total_reward}")
+        print(f"Episode {episode + 1}/{episodes}, Total Reward: {total_reward}")
 
     return rewards_history
+
 
 # Main script
 if __name__ == "__main__":
@@ -77,14 +66,14 @@ if __name__ == "__main__":
     #p.setAdditionalSearchPath(pybullet_data.getDataPath())
 
     # Initialize environment and custom policy
-    env = GYM(0,delay=0)
+    env = GYM(1,delay=0)
     input_size = env.observation_space.shape[0]  # Assuming environment provides observation_space
     hidden_size = 32  # Arbitrary choice; adjust as needed
-    policy = NNPolicy(input_size=input_size, hidden_size=hidden_size,env=env)
+    policy = NN(input_size, hidden_size,env=env)
 
     # Train the policy
     start_time = time.time()
-    train_policy(env, policy, episodes=5000, max_steps=1000)
+    rewards_history=train_policy(env, policy, episodes=5000, max_steps=1000)
     print(f"Training complete. Time taken: {(time.time() - start_time) / 3600:.2f} hours")
 
     # Test the trained policy
@@ -97,3 +86,12 @@ if __name__ == "__main__":
             obs = env.reset()
     policy.save("/its/home/drs25/Documents/GitHub/Quadruped/my_quadruped_model")
 
+    import matplotlib.pyplot as plt#
+    import matplotlib
+    matplotlib.use('TkAgg')
+    # Plot the reward progression
+    plt.plot(rewards_history)
+    plt.xlabel('Episode')
+    plt.ylabel('Total Reward')
+    plt.title('Reward Progression During Training')
+    plt.show()
