@@ -73,7 +73,7 @@ if __name__ == "__main__":
 
     # Train the policy
     start_time = time.time()
-    rewards_history=train_policy(env, policy, episodes=5000, max_steps=1000)
+    rewards_history=train_policy(env, policy, episodes=10000, max_steps=1000)
     print(f"Training complete. Time taken: {(time.time() - start_time) / 3600:.2f} hours")
 
     # Test the trained policy
@@ -84,8 +84,7 @@ if __name__ == "__main__":
         env.render()
         if done:
             obs = env.reset()
-    policy.save("/its/home/drs25/Documents/GitHub/Quadruped/my_quadruped_model")
-
+    torch.save(policy.state_dict(), "/its/home/drs25/Documents/GitHub/Quadruped/my_quadruped_model")
     import matplotlib.pyplot as plt#
     import matplotlib
     matplotlib.use('TkAgg')
