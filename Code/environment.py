@@ -107,6 +107,7 @@ class GYM(gym.Env):
         self.recording=0
         self.delay=delay
         self.filename=filename
+        self.time_step=0
     def step(self,action):
         self.quad.setPositions(action)
         for i in range(50):
@@ -116,6 +117,7 @@ class GYM(gym.Env):
             else:
                 p.setTimeStep(1./240.)
             #time.sleep(1/240.)
+        self.time_step+=1./240.
         orientation = self.quad.getOrientation()
         foot_pressure = self.quad.getFeet()
         curr=self.quad.getPos()
@@ -124,8 +126,14 @@ class GYM(gym.Env):
 
         #self.observation_space[self.observation_space<0]=0
 
-        distance_moved = curr[0]- self.start_position[0]  # Forward movement in x-direction
-        reward = 10 * distance_moved - np.abs(curr[1]-self.start_position[1])  # Penalize deviation from straight line
+        distance_moved = curr[0] - self.start_position[0]
+        forward_speed = distance_moved / self.time_step  # Assuming time_step is known or calculated
+        reward = forward_speed  # Reward for forward speed
+
+        # Penalize deviation from a straight line (both x and y directions)
+        deviation = np.abs(curr[0] - self.start_position[0]) + np.abs(curr[1] - self.start_position[1])
+        penalty = 0.5 * deviation  # Adjust the penalty factor as needed
+        reward -= penalty
         if self.view:
             basePos, baseOrn = p.getBasePositionAndOrientation(self.id) # Get model position
             self.p.resetDebugVisualizerCamera( cameraDistance=0.3, cameraYaw=75, cameraPitch=-20, cameraTargetPosition=basePos) # fix camera onto model
@@ -138,6 +146,7 @@ class GYM(gym.Env):
         foot_pressure = self.quad.getFeet()
         return torch.tensor(np.concatenate([foot_pressure, orientation,self.quad.motors]).flatten()).to(torch.float32)
     def reset(self):
+        self.time_step=0
         self.p.removeBody(self.id)
         del self.quad
         self.p.resetSimulation()
