@@ -16,7 +16,7 @@ if __name__ == "__main__":
     input_size = env.observation_space.shape[0]  # Assuming environment provides observation_space
     hidden_size = 32  # Arbitrary choice; adjust as needed
     policy =  NN(input_size,hidden_size)
-    policy.load_state_dict("/its/home/drs25/Documents/GitHub/Quadruped/my_quadruped_model")
+    policy.load_state_dict("/its/home/drs25/Documents/GitHub/Quadruped/my_quadruped_model_2")
 
     # Optionally load a saved policy
     save_path = "/its/home/drs25/Documents/GitHub/Quadruped/my_quadruped_model"
@@ -28,7 +28,9 @@ if __name__ == "__main__":
     # Test the trained policy
     obs = env.reset()
     for _ in range(1000):
-        action = policy.predict(obs)
+        obs_tensor = torch.tensor(obs, dtype=torch.float32)
+        action = policy(obs_tensor)
+        motors = policy.forward_positions(action, torch.tensor(env.quad.motors))
         obs, rewards, done, info = env.step(action)
         env.render()
         if done:
