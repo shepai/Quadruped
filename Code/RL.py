@@ -51,7 +51,8 @@ def train_policy(env, policy, episodes=1000, max_steps=1000, learning_rate=1e-2)
             if done:
                 break
             obs = next_obs
-
+            if step%100:
+                torch.save(policy.state_dict(), "/its/home/drs25/Documents/GitHub/Quadruped/my_quadruped_model_2")
         rewards_history.append(total_reward)
         print(f"Episode {episode + 1}/{episodes}, Total Reward: {total_reward}")
 
@@ -66,25 +67,27 @@ if __name__ == "__main__":
     #p.setAdditionalSearchPath(pybullet_data.getDataPath())
 
     # Initialize environment and custom policy
-    env = GYM(1,delay=0)
+    env = GYM(0,delay=0)
     input_size = env.observation_space.shape[0]  # Assuming environment provides observation_space
     hidden_size = 32  # Arbitrary choice; adjust as needed
     policy = NN(input_size, hidden_size,env=env)
 
     # Train the policy
     start_time = time.time()
-    rewards_history=train_policy(env, policy, episodes=10000, max_steps=1000)
+    rewards_history=train_policy(env, policy, episodes=650, max_steps=1000)
     print(f"Training complete. Time taken: {(time.time() - start_time) / 3600:.2f} hours")
 
     # Test the trained policy
     obs = env.reset()
     for _ in range(1000):
-        action = policy.predict(obs)
+        obs_tensor = torch.tensor(obs, dtype=torch.float32)
+        action = policy(obs_tensor)
+        motors = policy.forward_positions(action, torch.tensor(env.quad.motors))
         obs, rewards, done, info = env.step(action)
         env.render()
         if done:
             obs = env.reset()
-    torch.save(policy.state_dict(), "/its/home/drs25/Documents/GitHub/Quadruped/my_quadruped_model")
+    
     import matplotlib.pyplot as plt#
     import matplotlib
     matplotlib.use('TkAgg')
