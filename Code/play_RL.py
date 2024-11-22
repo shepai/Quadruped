@@ -16,14 +16,8 @@ if __name__ == "__main__":
     input_size = env.observation_space.shape[0]  # Assuming environment provides observation_space
     hidden_size = 32  # Arbitrary choice; adjust as needed
     policy =  NN(input_size,hidden_size)
-    policy.load_state_dict("/its/home/drs25/Documents/GitHub/Quadruped/my_quadruped_model_2")
+    policy.load_state_dict(torch.load("/its/home/drs25/Documents/GitHub/Quadruped/my_quadruped_model_2"))
 
-    # Optionally load a saved policy
-    save_path = "/its/home/drs25/Documents/GitHub/Quadruped/my_quadruped_model"
-    try:
-        policy.load(save_path)
-    except FileNotFoundError:
-        print("No saved policy found. Starting training from scratch.")
     
     # Test the trained policy
     obs = env.reset()
@@ -31,7 +25,7 @@ if __name__ == "__main__":
         obs_tensor = torch.tensor(obs, dtype=torch.float32)
         action = policy(obs_tensor)
         motors = policy.forward_positions(action, torch.tensor(env.quad.motors))
-        obs, rewards, done, info = env.step(action)
+        obs, rewards, done, info = env.step(motors)
         env.render()
         if done:
             obs = env.reset()
