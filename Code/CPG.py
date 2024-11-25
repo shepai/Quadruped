@@ -128,7 +128,7 @@ class generator(agent):
             positions.append(knee)
         self.val+=1
         #print(np.degrees(np.array(positions))/5)
-        positions=np.array(positions)/1.5
+        positions=(np.array(positions)/5)*180
         positions[positions<0]=0
         positions[positions>180]=180
         return np.degrees(positions)
@@ -194,9 +194,9 @@ class NN(nn.Module):
             positions[i + 2] = self.sig.forward(x[j] + self.val)
         
         self.val += 1
-        positions = motors + positions
+        positions = motors + ((positions)/5)*50
         positions[positions < 0] = 0
-        positions[positions > 50] = 30
+        positions[positions > 50] = 50
         return torch.tensor(positions)
     def get_positions(self, x, motors=0):
         """Generate positions for the robot's motors."""
@@ -219,6 +219,66 @@ class NN(nn.Module):
         """Mutate the model's parameters by adding noise."""
         mutated_genotype = self.genotype + np.random.normal(0, std, self.genotype.shape)
         self.set_genotype(mutated_genotype)
+from stable_baselines3.common.policies import ActorCriticPolicy
+from stable_baselines3.common.torch_layers import BaseFeaturesExtractor
+from torch.distributions import Categorical
+
+
+class CustomNNPolicy(ActorCriticPolicy):
+    def __init__(self, observation_space, action_space, lr_schedule, *args, **kwargs):
+        # Initialize the base ActorCriticPolicy
+        super(CustomNNPolicy, self).__init__(
+            observation_space,
+            action_space,
+            lr_schedule,
+            *args,
+            **kwargs,
+        )
+        
+        # Define the custom neural network
+        self.net = NN(inp=observation_space.shape[0], hidden=64)
+        self.sig = Pattern(0, 0, 0, 0)  # External object, assumed defined elsewhere
+        self.val = 0  # Keeps track of the step for position encoding
+
+    def forward(self, obs, *args, **kwargs):
+        """Forward pass through policy and value networks."""
+        print(">>>",obs)
+        print(obs.actor)
+        obs=torch.tensor(obs.sample(),dtype=torch.float32)
+        features = self.net(obs)  # Pass observation through the custom NN
+        actions=self.forward_positions(features)
+        self.val+=1
+        return actions
+    def forward_positions(self,x,motors=0):
+        positions = np.zeros(12)
+        for j, i in enumerate(range(0, 12, 3)):  # Loop through legs assigning phase encoding
+            self.sig.set_param(*x[0:4])
+            positions[i] = self.sig.forward(x[j] + self.val)
+            self.sig.set_param(*x[4:8])
+            positions[i + 1] = self.sig.forward(x[j] + self.val)
+            self.sig.set_param(*x[8:12])
+            positions[i + 2] = self.sig.forward(x[j] + self.val)
+        
+        self.val += 1
+        positions = motors + ((positions)/5)*50
+        positions[positions < 0] = 0
+        positions[positions > 50] = 50
+        return torch.tensor(positions)
+    def evaluate_actions(self, obs, actions):
+        """Evaluate the actions for the given observations."""
+        features = self.net(obs)
+        actions=self.forward_positions(features)
+        
+        distribution = Categorical(logits=actions)
+        log_probs = distribution.log_prob(features)
+        entropy = distribution.entropy()
+        
+        return actions, log_probs, entropy
+
+    def get_positions(self, obs, motors=0):
+        """Generate positions for the robot's motors."""
+        positions = self.net.get_positions(obs, motors=motors)
+        return positions
 
 if __name__ == "__main__":
     import matplotlib.pyplot as plt
