@@ -16,7 +16,7 @@ if __name__ == "__main__":
     input_size = env.observation_space.shape[0]  # Assuming environment provides observation_space
     hidden_size = 32  # Arbitrary choice; adjust as needed
     policy =  NN(input_size,hidden_size)
-    policy.load_state_dict(torch.load("/its/home/drs25/Documents/GitHub/Quadruped/my_quadruped_model_2"))
+    policy.load_state_dict(torch.load("/its/home/drs25/Documents/GitHub/Quadruped/my_quadruped_model"))
 
     
     # Test the trained policy

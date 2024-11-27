@@ -2,9 +2,9 @@ from environment import *
 from CPG import *
 import time
 from copy import deepcopy
-env=environment(0)
+env=environment(1)
 def fitness_(robot):
-    positions=np.array(robot.positions)
+    positions=torch.tensor(robot.positions)
     shift=positions[1:]
     shift_=positions[:-1]
     distanceA = euclidean_distance(np.array(robot.getPos()[0:2]).reshape((1,2)),np.array(robot.start[0:2]).reshape((1,2))) #*0.8 - euclidean_distance(robot.start_orientation,robot.getOrientation())*0.1)#-robot.get_self_collision_count()*0.01
