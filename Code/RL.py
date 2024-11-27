@@ -18,41 +18,47 @@ def loss_function(predictions, rewards):
 import torch
 import torch.optim as optim
 import torch.nn.functional as F
+def train_policy(env, policy, episodes=1000, max_steps=1000, learning_rate=1e-2, gamma=0.99, noise_scale=0.1):
+    import torch
+    from torch import optim
+    import matplotlib.pyplot as plt
 
-def train_policy(env, policy, episodes=1000, max_steps=1000, learning_rate=1e-2):
-    # Define optimizer
-    optimizer = optim.SGD(policy.parameters(), lr=learning_rate)
+    optimizer = optim.Adam(policy.parameters(), lr=learning_rate)
     rewards_history = []
 
     for episode in range(episodes):
         obs = env.reset()
-        total_reward = 0
+        episode_rewards = []
+        log_probs = []
         ar=[]
+        total_reward = 0
+        motor_positions_history = []
+
         plt.cla()
         plt.title("Motor positions of robot")
+
         for step in range(max_steps):
             # Convert observation to tensor
             obs_tensor = torch.tensor(obs, dtype=torch.float32)
 
-            # Forward pass through the policy
-            action = policy(obs_tensor)
-            motors = policy.forward_positions(action, torch.tensor(env.quad.motors))
-            ar.append(motors.cpu().detach().numpy())
+            # Forward pass through the policy to get sine wave parameters
+            sine_params = policy(obs_tensor)  # Outputs the sine wave parameters deterministically
+
+            # Add exploration noise to the parameters
+            noise = torch.normal(0, noise_scale, size=sine_params.shape)
+            noisy_params = sine_params + noise
+
+            # Generate motor positions using the (noisy) parameters
+            motors = policy.forward_positions(noisy_params, torch.tensor(env.quad.motors))
+            motor_positions_history.append(motors.cpu().detach().numpy())
+
             # Take a step in the environment
-            next_obs, reward, done, _ = env.step(motors)
+            next_obs, reward, done, _ = env.step(motors.numpy())
+            episode_rewards.append(reward)
+
             total_reward += reward
-
-            # Convert reward to tensor for loss computation
-            reward_tensor = torch.tensor(reward, dtype=torch.float32)
-
-            # Compute loss
-            loss = F.mse_loss(action, reward_tensor)
-
-            # Zero gradients, backpropagate, and update
-            optimizer.zero_grad()
-            loss.backward()
-            optimizer.step()
-
+            obs = next_obs
+            ar.append(motors.cpu().detach().numpy())
             if done:
                 break
             obs = next_obs
@@ -64,11 +70,33 @@ def train_policy(env, policy, episodes=1000, max_steps=1000, learning_rate=1e-2)
             
             plt.plot(ar)
             plt.pause(0.01)
+
+        # Compute discounted rewards
+        discounted_rewards = []
+        cumulative_reward = 0
+        for r in reversed(episode_rewards):
+            cumulative_reward = r + gamma * cumulative_reward
+            discounted_rewards.insert(0, cumulative_reward)
+
+        # Normalize rewards
+        discounted_rewards = torch.tensor(discounted_rewards, dtype=torch.float32)
+        discounted_rewards = (discounted_rewards - discounted_rewards.mean()) / (discounted_rewards.std() + 1e-9)
+
+        # Compute loss
+        loss = 0
+        for param, reward in zip(noisy_params, discounted_rewards):
+            # Penalize divergence of noisy actions from original deterministic policy output
+            loss += ((param - sine_params) ** 2).sum() * reward  # Weighted by reward
+
+        # Backpropagation
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+
         rewards_history.append(total_reward)
         print(f"Episode {episode + 1}/{episodes}, Total Reward: {total_reward}")
 
     return rewards_history
-
 
 # Main script
 if __name__ == "__main__":
@@ -98,7 +126,10 @@ if __name__ == "__main__":
         env.render()
         if done:
             obs = env.reset()
-
+    
+    import matplotlib.pyplot as plt#
+    import matplotlib
+    matplotlib.use('TkAgg')
     # Plot the reward progression
     plt.plot(rewards_history)
     plt.xlabel('Episode')
