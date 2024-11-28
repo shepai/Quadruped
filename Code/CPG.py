@@ -113,7 +113,7 @@ class generator(agent):
         self.hip=Pattern(*hips)
         self.geno=np.concatenate([phase,g1,g2,hips])
         self.val=0
-    def get_positions(self,inputs):
+    def get_positions(self,inputs,motors=None):
         positions=[]
         #Inputs[0]+=inputs[0] #add proprioception
         #Inputs[1]+=inputs[1]
@@ -131,14 +131,14 @@ class generator(agent):
         positions=(np.array(positions)/5)*180
         positions[positions<0]=0
         positions[positions>180]=180
-        return np.degrees(positions)
+        return positions
     def set_genotype(self,val):
         #mutate instead
         self.geno=val.copy()
         self.leg=Pattern(*self.geno[4:8])
         self.knee=Pattern(*self.geno[8:12])
         self.hip=Pattern(*self.geno[12:16])
-        self.val=0
+        #self.val=0
     def mutate(self):
         phase=np.array([np.random.randint(-50,50) for i in range(4)])
         self.geno[0:4]+=phase
