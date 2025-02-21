@@ -57,7 +57,7 @@ class environment:
     def runTrial(self,agent,generations,delay=False,fitness=demo):
         self.reset()
         for i in range(generations):
-            motor_positions=agent.get_positions(self.quad.motors,motors=self.quad.motors)
+            motor_positions=torch.tensor(agent.get_positions(torch.tensor(self.quad.motors).reshape(1,len(self.quad.motors)),motors=torch.tensor(self.quad.motors)))
             self.quad.setPositions(motor_positions)
             for k in range(10): #update simulation
                 p.stepSimulation()
@@ -70,6 +70,17 @@ class environment:
             if self.quad.hasFallen():
                 break
         return fitness(self.quad)
+    def step(self,agent,action,delay=False):
+        motor_positions=torch.tensor(agent.get_positions(torch.tensor(self.quad.motors).reshape(1,len(self.quad.motors)),motors=torch.tensor(self.quad.motors)))
+        self.quad.setPositions(motor_positions)
+        for k in range(10): #update simulation
+            p.stepSimulation()
+            if delay: time.sleep(1./240.)
+            else: p.setTimeStep(1./240.)
+            basePos, baseOrn = p.getBasePositionAndOrientation(self.robot_id) # Get model position
+            p.resetDebugVisualizerCamera( cameraDistance=0.3, cameraYaw=75, cameraPitch=-20, cameraTargetPosition=basePos) # fix camera onto model
+            if self.quad.hasFallen():
+                self.reset()
     def stop(self):
         if self.recording and self.record:
             p.stopStateLogging(self.video_log_id)
@@ -109,8 +120,9 @@ class GYM(gym.Env):
         self.filename=filename
         self.time_step=0
     def step(self,action):
+        action=torch.tensor(action)
         self.quad.setPositions(action)
-        for i in range(50):
+        for i in range(100):
             p.stepSimulation()
             if self.delay:
                 time.sleep(1./240.)
@@ -133,7 +145,7 @@ class GYM(gym.Env):
         # Penalize deviation from a straight line (both x and y directions)
         deviation = np.abs(curr[0] - self.start_position[0]) + np.abs(curr[1] - self.start_position[1])
         penalty = 0.5 * deviation  # Adjust the penalty factor as needed
-        reward -= penalty
+        reward -= penalty + .01*torch.sum(torch.abs(action))
         if self.view:
             basePos, baseOrn = p.getBasePositionAndOrientation(self.id) # Get model position
             self.p.resetDebugVisualizerCamera( cameraDistance=0.3, cameraYaw=75, cameraPitch=-20, cameraTargetPosition=basePos) # fix camera onto model
