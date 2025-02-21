@@ -18,9 +18,9 @@ def euclidean_distance(point1, point2):
 #agent goes in population generation
 #initial
 population_size=50
-population=[NN(12,20) for _ in range(population_size)]#np.random.choice([50, 20, 0,0,0,0,-20],(150,15,12)) #12 motors, 15 steps
+population=[Body(6,4) for _ in range(population_size)]#np.random.choice([50, 20, 0,0,0,0,-20],(150,15,12)) #12 motors, 15 steps
 fitnesses=np.zeros((population_size,))
-generations=500
+generations=5000
 t_start=time.time()
 #get fitnesses
 for i in range(len(fitnesses)):

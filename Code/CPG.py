@@ -15,7 +15,9 @@ class Network:
         self.dt = 0.1
         self.b = np.random.normal(0, std, num)  # Bias terms
         self.O = self.sigma(self.A)
-        self.gains = np.random.normal(0, 5, (num, ))  # Gains for activation
+        self.gains = np.ones((num,))#np.random.normal(0, 1, (num, ))  # Gains for activation
+        #self.gains[self.gains>2]=2
+        #self.gains[self.gains>-2]=-2
         self.reset()
         self.bias_val=0
 
@@ -30,8 +32,8 @@ class Network:
         self.O = self.sigma(self.gains * (self.A + self.b))
         total_inputs = np.dot(self.weights, self.O) + I
         self.A += (self.dt / self.Tau) * (total_inputs - self.A)
-        
         return self.O
+    
 """class Network:
     def __init__(self,num,std=5):
         self.A=np.zeros((num))
@@ -50,7 +52,7 @@ class Network:
     
 class CPG(agent):
     def __init__(self,num_neurons):
-        agent.__init__(self)
+        super().__init__()
         self.cpg=Network(num_neurons)
         self.num_neurons=num_neurons
         self.geno=np.concatenate([self.cpg.weights.flatten(),self.cpg.b.flatten(),self.cpg.Tau.flatten()])
@@ -60,7 +62,7 @@ class CPG(agent):
         self.body=[]
         for i in range(4): #one for each leg
             self.body.append(deepcopy(self.cpg))
-    def get_positions(self,inputs):
+    def get_positions(self,inputs,motors=None):
         positions=[]
         Inputs=np.zeros((self.num_neurons))
         #Inputs[0]+=inputs[0] #add proprioception
@@ -87,11 +89,41 @@ class CPG(agent):
         self.cpg.b[self.cpg.b<-4] = -4#cap bias
         self.cpg.b[self.cpg.b>4] = 4 #cap bias
         self.cpg.Tau=values[len(self.cpg.weights.flatten())+len(self.cpg.b.flatten()):len(self.cpg.weights.flatten())+len(self.cpg.b.flatten())+len(self.cpg.Tau)].reshape(self.cpg.Tau.shape)
+        self.cpg.Tau[self.cpg.Tau<self.cpg.dt]=self.cpg.dt
         self.cpg.weights[self.cpg.weights>16]=16 #cap weights
         self.cpg.weights[self.cpg.weights<-16]=-16 #cap weights
         self.populateBody()
         return super().set_genotype(np.concatenate([self.cpg.weights.flatten(),self.cpg.b.flatten(),self.cpg.Tau.flatten()]))
-    
+    def mutate(self,rate=0.2):
+        probailities=np.random.random(self.geno.shape)
+        self.geno[np.where(probailities<rate)]+=np.random.normal(0,4,self.geno[np.where(probailities<rate)].shape)
+        self.set_genotype(self.geno)
+
+def Body(CPG):
+    def __init__(self,num_neurons,num_legs):
+        super().__init__(num_neurons)
+        self.num_legs=num_legs
+        self.cpg=Network(num_neurons)
+        self.legs=[deepcopy(self.cpg) for i in range(num_legs)]
+        self.num_neurons=num_neurons
+        self.geno=np.concatenate([self.cpg.weights.flatten(),self.cpg.b.flatten(),self.cpg.Tau.flatten()])
+        self.set_genotype(self.geno)
+        self.populateBody()
+    def get_positions(self,inputs,motors=None,amount=12):
+        out=np.zeros(inputs.shape)
+        positions=np.zeros((amount,))
+        i=0
+        for genorator in self.legs:
+            out=genorator.forward(I=inputs+out)
+            positions[0+i:2+i]=out[0+i:2]
+            i+=3
+        return positions
+    def mutate(self,rate=0.2):
+        probailities=np.random.random(self.geno.shape)
+        self.geno[np.where(probailities<rate)]+=np.random.normal(0,4,self.geno[np.where(probailities<rate)].shape)
+        self.set_genotype(self.geno)
+        self.legs=[deepcopy(self.cpg) for i in range(self.num_legs)]
+
 class Pattern:
     def __init__(self,a,h,b,k):
         self.geno=torch.tensor([a,h,b,k])
@@ -139,8 +171,11 @@ class generator(agent):
         self.knee=Pattern(*self.geno[8:12])
         self.hip=Pattern(*self.geno[12:16])
         #self.val=0
-    def mutate(self):
-        phase=np.array([np.random.randint(-50,50) for i in range(4)])
+    def reset(self):
+        self.val=0
+    def mutate(self,rate=0.1):
+        phase=np.array([np.random.normal(0,5) for i in range(4)])
+        probs=np.random.random(phase)
         self.geno[0:4]+=phase
         self.geno[0:4][self.geno[0:4]>100]=100
         self.geno[0:4][self.geno[0:4]<0]=0
@@ -323,14 +358,15 @@ if __name__ == "__main__":
         plt.plot(positions[:,i],c=c[i],label=label[i])
     plt.legend(loc="upper right")
     plt.show()"""
-    n=NN(10,20)
+    """n=NN(10,20)
     n.set_genotype(torch.rand(n.genotype.shape))
     motors=[]
     for i in range(300):
         motors.append(n.get_positions(torch.zeros((1,10))).detach().numpy())
     plt.plot(np.array(motors))
-    plt.show()
-    
+    plt.show()"""
+
+    b=Body(10,10)    
 
 
 
