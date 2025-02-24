@@ -1,9 +1,12 @@
+if __name__=="__main__":
+    import sys
+    sys.path.insert(1, '/its/home/drs25/Documents/GitHub/Quadruped/Code')
 from environment import *
 from CPG import *
 import pickle
-with open('genotypes_s.pkl', 'rb') as f:
+with open('genotypes.pkl', 'rb') as f:
     population = pickle.load(f)
-fitnesses=np.load("fitnesses_s.npy")
+fitnesses=np.load("fitnesses.npy")
 
 def euclidean_distance(point1, point2):
     return np.sqrt(np.sum((np.array(point1) - np.array(point2)) ** 2))
