@@ -85,7 +85,8 @@ class environment:
             basePos, baseOrn = p.getBasePositionAndOrientation(self.robot_id) # Get model position
             p.resetDebugVisualizerCamera( cameraDistance=0.3, cameraYaw=75, cameraPitch=-20, cameraTargetPosition=basePos) # fix camera onto model
             if self.quad.hasFallen():
-                self.reset()
+                
+                break
     def stop(self):
         if self.recording and self.record:
             p.stopStateLogging(self.video_log_id)

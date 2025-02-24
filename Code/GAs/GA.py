@@ -1,7 +1,12 @@
+if __name__=="__main__":
+    import sys
+    sys.path.insert(1, '/its/home/drs25/Documents/GitHub/Quadruped/Code')
 from environment import *
 from CPG import *
 import time
 from copy import deepcopy
+from geno_generator import *
+
 env=environment(1)
 def fitness_(robot):
     positions=torch.tensor(robot.positions)
@@ -18,7 +23,14 @@ def euclidean_distance(point1, point2):
 #agent goes in population generation
 #initial
 population_size=50
+#g=geno_gen(6,population_size)
 population=[Body(6,4) for _ in range(population_size)]#np.random.choice([50, 20, 0,0,0,0,-20],(150,15,12)) #12 motors, 15 steps
+"""population=[]
+for i in range(population_size):
+    b=Body(6,4)
+    b.set_genotype(g.population[i])
+    population.append(deepcopy(b))"""
+    
 fitnesses=np.zeros((population_size,))
 generations=5000
 t_start=time.time()
