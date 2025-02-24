@@ -20,18 +20,21 @@ class Network:
         #self.gains[self.gains>-2]=-2
         self.reset()
         self.bias_val=0
-
+        self.t=0
     def reset(self):
         self.A = np.random.uniform(0.1, 0.2, self.num) + np.random.normal(0, 0.05, self.num)
         self.O = self.sigma(self.A)
-
+        self.t = 0
     def sigma(self, x):
         return np.tanh(x) #1 / (1 + np.exp(-x))
 
     def forward(self, I=0):
+        I=np.sin(self.t)
         self.O = self.sigma(self.gains * (self.A + self.b))
+        #print(self.weights.shape,self.O.shape,I.shape)
         total_inputs = np.dot(self.weights, self.O) + I
         self.A += (self.dt / self.Tau) * (total_inputs - self.A)
+        self.t+=self.dt
         return self.O
     
 """class Network:
@@ -52,7 +55,7 @@ class Network:
     
 class CPG(agent):
     def __init__(self,num_neurons):
-        super().__init__()
+        agent.__init__(self)
         self.cpg=Network(num_neurons)
         self.num_neurons=num_neurons
         self.geno=np.concatenate([self.cpg.weights.flatten(),self.cpg.b.flatten(),self.cpg.Tau.flatten()])
@@ -92,16 +95,16 @@ class CPG(agent):
         self.cpg.Tau[self.cpg.Tau<self.cpg.dt]=self.cpg.dt
         self.cpg.weights[self.cpg.weights>16]=16 #cap weights
         self.cpg.weights[self.cpg.weights<-16]=-16 #cap weights
-        self.populateBody()
+        #self.populateBody()
         return super().set_genotype(np.concatenate([self.cpg.weights.flatten(),self.cpg.b.flatten(),self.cpg.Tau.flatten()]))
     def mutate(self,rate=0.2):
         probailities=np.random.random(self.geno.shape)
         self.geno[np.where(probailities<rate)]+=np.random.normal(0,4,self.geno[np.where(probailities<rate)].shape)
         self.set_genotype(self.geno)
 
-def Body(CPG):
+class Body(CPG):
     def __init__(self,num_neurons,num_legs):
-        super().__init__(num_neurons)
+        CPG.__init__(self,num_neurons)
         self.num_legs=num_legs
         self.cpg=Network(num_neurons)
         self.legs=[deepcopy(self.cpg) for i in range(num_legs)]
@@ -113,9 +116,10 @@ def Body(CPG):
         out=np.zeros(inputs.shape)
         positions=np.zeros((amount,))
         i=0
+        inputs=inputs.squeeze()
         for genorator in self.legs:
-            out=genorator.forward(I=inputs+out)
-            positions[0+i:2+i]=out[0+i:2]
+            out=genorator.forward(I=0)
+            positions[0+i:3+i]=out[0:3]*40
             i+=3
         return positions
     def mutate(self,rate=0.2):
