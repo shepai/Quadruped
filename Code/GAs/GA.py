@@ -6,6 +6,7 @@ from CPG import *
 import time
 from copy import deepcopy
 from geno_generator import *
+import pickle
 
 env=environment(1)
 def fitness_(robot):
@@ -59,10 +60,11 @@ for gen in range(generations):
     #if gen%10==0:
         #runTrial(population[np.where(fitnesses==np.max(fitnesses))[0][0]],150)
 #play the trials on reapeat
-import pickle
-with open('genotypes.pkl', 'wb') as f:
-    pickle.dump(population, f)
-np.save("fitnesses",fitnesses)
+    if gen%100==0:
+        
+        with open('genotypes.pkl', 'wb') as f:
+            pickle.dump(population, f)
+        np.save("fitnesses",fitnesses)
 
 p.disconnect()
 p.connect(p.GUI)
