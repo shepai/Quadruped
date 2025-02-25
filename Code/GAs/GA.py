@@ -62,7 +62,7 @@ for gen in range(generations):
 #play the trials on reapeat
     if gen%100==0:
         
-        with open('genotypes.pkl', 'wb') as f:
+        with open('/its/home/drs25/Documents/GitHub/Quadruped/models/genotypes.pkl', 'wb') as f:
             pickle.dump(population, f)
         np.save("fitnesses",fitnesses)
 
