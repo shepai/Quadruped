@@ -8,7 +8,7 @@ from copy import deepcopy
 from geno_generator import *
 import pickle
 
-env=environment(1)
+env=environment(0)
 def fitness_(robot):
     positions=torch.tensor(robot.positions)
     shift=positions[1:]
@@ -33,7 +33,7 @@ for i in range(population_size):
     population.append(deepcopy(b))"""
     
 fitnesses=np.zeros((population_size,))
-generations=5000
+generations=3000
 t_start=time.time()
 #get fitnesses
 for i in range(len(fitnesses)):
