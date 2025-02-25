@@ -4,9 +4,9 @@ if __name__=="__main__":
 from environment import *
 from CPG import *
 import pickle
-with open('genotypes.pkl', 'rb') as f:
+with open('/its/home/drs25/Documents/GitHub/Quadruped/genotypes.pkl', 'rb') as f:
     population = pickle.load(f)
-fitnesses=np.load("fitnesses.npy")
+fitnesses=np.load("/its/home/drs25/Documents/GitHub/Quadruped/fitnesses.npy")
 
 def euclidean_distance(point1, point2):
     return np.sqrt(np.sum((np.array(point1) - np.array(point2)) ** 2))
@@ -16,6 +16,6 @@ def fitness(robot):
     if robot.hasFallen(): return 0
     return distance
 
-env=environment(True,True,"/its/home/drs25/Documents/GitHub/Quadruped/assets/videos/example.mp4")
-env.runTrial(population[np.where(fitnesses==np.max(fitnesses))[0][0]],500,delay=1)
+env=environment(True,1,"/its/home/drs25/Documents/GitHub/Quadruped/assets/videos/example_short.mp4")
+env.runTrial(population[np.where(fitnesses==np.max(fitnesses))[0][0]],50,delay=1)
 env.stop()
