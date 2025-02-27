@@ -10,6 +10,7 @@ import numpy as np
 import os
 import random
 from copy import deepcopy
+import uuid
 try:
     import gym
     from gym import spaces
@@ -34,7 +35,7 @@ class environment:
         self.record=record
         self.filename=filename
         self.recording=0
-        
+        self.history={}
     def reset(self):
         p.resetSimulation()
         p.setGravity(0, 0, -9.81)
@@ -62,21 +63,36 @@ class environment:
             else: p.setTimeStep(1./240.)
             t+=dt"""
     def runTrial(self,agent,generations,delay=False,fitness=demo):
+        history={}
+        history['positions']=[]
+        history['orientations']=[]
+        history['motors']=[]
+        history['accumalitive_reward']=[]
         self.reset()
-        for i in range(generations):
-            motor_positions=torch.tensor(agent.get_positions(torch.tensor(self.quad.motors).reshape(1,len(self.quad.motors)),motors=torch.tensor(self.quad.motors)))
-            self.quad.setPositions(motor_positions)
-            for k in range(10): #update simulation
-                self.step(agent,0,delay=delay)
-                basePos, baseOrn = p.getBasePositionAndOrientation(self.robot_id) # Get model position
-                p.resetDebugVisualizerCamera( cameraDistance=0.3, cameraYaw=75, cameraPitch=-20, cameraTargetPosition=basePos) # fix camera onto model
-                if self.quad.hasFallen():
-                    break
+        a=[]
+        for i in range(generations*10):
+            pos=self.step(agent,0,delay=delay)
+            basePos, baseOrn = p.getBasePositionAndOrientation(self.robot_id) # Get model position
+            history['positions'].append(basePos)
+            history['orientations'].append(baseOrn[0:3])
+            history['motors'].append(pos)
+            history['accumalitive_reward'].append(fitness(self.quad,history=history))
+            
+            p.resetDebugVisualizerCamera( cameraDistance=0.3, cameraYaw=75, cameraPitch=-20, cameraTargetPosition=basePos) # fix camera onto model
             if self.quad.hasFallen():
                 break
-        return fitness(self.quad)
+            if self.quad.hasFallen():
+                break
+            a.append(pos)
+        history['positions']=np.array(history['positions'])
+        history['orientations']=np.array(history['orientations'])
+        history['motors']=np.array(history['motors'])
+        history['accumalitive_reward']=np.array(history['accumalitive_reward'])
+        filename = str(uuid.uuid4())
+        np.save("/its/home/drs25/Documents/GitHub/Quadruped/Code/data_collect_proj/trials/"+str(filename),history)
+        return fitness(self.quad,history=history),a
     def step(self,agent,action,delay=False,gen=0):
-        motor_positions=torch.tensor(agent.get_positions(torch.tensor(self.quad.motors).reshape(1,len(self.quad.motors)),motors=torch.tensor(self.quad.motors)))
+        motor_positions=agent.get_positions(np.array(self.quad.motors))
         self.quad.setPositions(motor_positions)
         for k in range(10): #update simulation
             p.stepSimulation()
@@ -87,6 +103,7 @@ class environment:
             if self.quad.hasFallen():
                 
                 break
+        return motor_positions
     def stop(self):
         if self.recording and self.record:
             p.stopStateLogging(self.video_log_id)
