@@ -10,10 +10,10 @@ class Network:
         self.num = num
         self.std = std
         self.A = np.random.uniform(0.1, 0.2, num) + np.random.normal(0, 0.05, num)  # Add noise
-        self.weights = np.random.normal(0, std, (num, num))  # Weight matrix
+        self.weights = np.random.normal(0, std, (num, num))# np.random.random(0, std, (num, num))  # Weight matrix
         self.Tau = np.ones(num)  # Time constants
         self.dt = 0.1
-        self.b = np.random.normal(0, std, num)  # Bias terms
+        self.b = np.random.normal(0, std, num)#np.random.normal(0, std, num)  # Bias terms
         self.O = self.sigma(self.A)
         self.gains = np.ones((num,))#np.random.normal(0, 1, (num, ))  # Gains for activation
         #self.gains[self.gains>2]=2
@@ -26,10 +26,10 @@ class Network:
         self.O = self.sigma(self.A)
         self.t = 0
     def sigma(self, x):
-        return np.tanh(x) #1 / (1 + np.exp(-x))
+        return 1 / (1 + np.exp(-x)) #np.tanh(x) #
 
     def forward(self, I=0):
-        I=np.sin(self.t)
+        I+=np.sin(self.t)
         self.O = self.sigma(self.gains * (self.A + self.b))
         #print(self.weights.shape,self.O.shape,I.shape)
         total_inputs = np.dot(self.weights, self.O) + I
@@ -89,12 +89,12 @@ class CPG(agent):
     def set_genotype(self, values):
         self.cpg.weights=values[0:len(self.cpg.weights.flatten())].reshape(self.cpg.weights.shape)
         self.cpg.b=values[len(self.cpg.weights.flatten()):len(self.cpg.weights.flatten())+len(self.cpg.b.flatten())]
-        self.cpg.b[self.cpg.b<-4] = -4#cap bias
-        self.cpg.b[self.cpg.b>4] = 4 #cap bias
+        self.cpg.b[self.cpg.b<-16] = -16#cap bias
+        self.cpg.b[self.cpg.b>16] = 16 #cap bias
         self.cpg.Tau=values[len(self.cpg.weights.flatten())+len(self.cpg.b.flatten()):len(self.cpg.weights.flatten())+len(self.cpg.b.flatten())+len(self.cpg.Tau)].reshape(self.cpg.Tau.shape)
         self.cpg.Tau[self.cpg.Tau<self.cpg.dt]=self.cpg.dt
-        self.cpg.weights[self.cpg.weights>16]=16 #cap weights
-        self.cpg.weights[self.cpg.weights<-16]=-16 #cap weights
+        self.cpg.weights[self.cpg.weights>4]=4 #cap weights
+        self.cpg.weights[self.cpg.weights<-4]=-4 #cap weights
         #self.populateBody()
         return super().set_genotype(np.concatenate([self.cpg.weights.flatten(),self.cpg.b.flatten(),self.cpg.Tau.flatten()]))
     def mutate(self,rate=0.2):
@@ -112,21 +112,94 @@ class Body(CPG):
         self.geno=np.concatenate([self.cpg.weights.flatten(),self.cpg.b.flatten(),self.cpg.Tau.flatten()])
         self.set_genotype(self.geno)
         self.populateBody()
-    def get_positions(self,inputs,motors=None,amount=12):
-        out=np.zeros(inputs.shape)
+    def get_positions(self,motors,amount=12):
         positions=np.zeros((amount,))
         i=0
-        inputs=inputs.squeeze()
+        #flip=True
+        previous=np.zeros((self.num_neurons,)).astype(np.float64)
         for genorator in self.legs:
-            out=genorator.forward(I=0)
-            positions[0+i:3+i]=out[0:3]*40
+            out=genorator.forward(I=previous)
+            positions[0+i:3+i]=np.degrees(out[0:3]*1.5)
+            #if flip: flip = not flip
+            #else: positions[0+i:3+i]*=-1 #flip the legs for symmetry
             i+=3
+            previous=np.concatenate([[0.0 for j in range(self.num_neurons-3)],motors[0+(i-3):3+(i-3)]/100]).astype(np.float64)
+        positions[positions<0]=0.0
+        positions[positions>180]=180.0
+        #print(positions)
         return positions
     def mutate(self,rate=0.2):
         probailities=np.random.random(self.geno.shape)
         self.geno[np.where(probailities<rate)]+=np.random.normal(0,4,self.geno[np.where(probailities<rate)].shape)
         self.set_genotype(self.geno)
         self.legs=[deepcopy(self.cpg) for i in range(self.num_legs)]
+class CTRNNQuadruped:
+    def __init__(self, num_legs=4, num_motors_per_leg=3, dt=0.01):
+        self.num_legs = num_legs
+        self.num_motors = num_legs * num_motors_per_leg  # 12 motors total
+        self.dt = dt  # Time step for integration
+        
+        #initialize CTRNN parameters
+        self.tau = np.ones(self.num_motors) * 0.5  # Time constants (modifiable via evolution)
+        self.weights = np.random.uniform(-1, 1, (self.num_motors, self.num_motors))  # Synaptic weights
+        self.biases = np.zeros(self.num_motors)  # Bias terms
+        self.activations = np.zeros(self.num_motors)  # Neuron activations
+        self.outputs = np.zeros(self.num_motors)  # Motor output (joint angles)
+
+        #frequency and phase offsets for oscillatory behavior
+        self.omega = np.random.uniform(0.8, 1.2, self.num_motors)  # Oscillation frequencies
+        self.phases = np.linspace(0, 2 * np.pi, self.num_motors, endpoint=False)  # Initial phase
+
+        self.geno=np.concatenate([self.weights.flatten(),self.biases.flatten(),self.tau.flatten(),self.omega.flatten()])
+
+        #IMU Feedback Gains (Proportional control for stability)
+        self.Kp_imu = 0.5  # Adjusts hip based on tilt
+        self.Kp_vel = 0.3  # Adjusts knee based on forward velocity
+
+    def sigmoid(self, x):
+        return 1 / (1 + np.exp(-x))
+    def get_positions(self,inputs,motors=None):
+        return np.degrees(self.step(imu_feedback=0, velocity_feedback=0))
+    def step(self, imu_feedback, velocity_feedback):
+        """Update the CTRNN for one timestep."""
+        #compute neural activations (discrete update of CTRNN)
+        net_input = self.weights @ self.outputs + self.biases
+        self.activations += self.dt / self.tau * (-self.activations + net_input)
+        self.outputs = self.sigmoid(self.activations)  #apply activation function
+        #add oscillatory gait modulation
+        self.phases += self.dt * self.omega
+        oscillation = np.sin(self.phases)
+        #compute motor commands (combining CTRNN output and oscillations)
+        motor_commands = self.outputs + 0.5 * oscillation
+        #apply IMU feedback for balance correction (modify hip joints)
+        imu_correction = self.Kp_imu * imu_feedback  # Pitch correction
+        motor_commands[::3] += imu_correction  # Adjust hips
+        #apply velocity feedback for adaptive stride length (modify knees)
+        velocity_correction = self.Kp_vel * velocity_feedback
+        motor_commands[1::3] += velocity_correction  # Adjust knee motors
+
+        return np.clip(motor_commands, 0, 1)  # Return motor positions (normalized)
+    def set_genotype(self, values):
+        """Set CTRNN parameters from an evolutionary genotype."""
+        num_weights = len(self.weights.flatten())
+        num_biases = len(self.biases.flatten())
+        num_tau = len(self.tau.flatten())
+        num_omega = len(self.omega.flatten())
+        #assign genotype values to weights, biases, and time constants
+        self.weights = values[0:num_weights].reshape(self.weights.shape)
+        self.biases = values[num_weights:num_weights + num_biases]
+        self.tau = values[num_weights + num_biases:num_weights + num_biases + num_tau].reshape(self.tau.shape)
+        self.omega = values[num_weights + num_biases + num_tau: num_weights + num_biases + num_tau + num_omega].reshape(self.omega.shape)
+        #apply value constraints
+        self.biases = np.clip(self.biases, -16, 16)  # Cap bias values
+        self.tau = np.maximum(self.tau, self.dt)  # Ensure time constants are above dt
+        self.weights = np.clip(self.weights, -4, 4)  # Cap weight values
+        self.omega = np.clip(self.omega, -1, 1)  # Cap weight values
+
+    def mutate(self,rate=0.2):
+        probailities=np.random.random(self.geno.shape)
+        self.geno[np.where(probailities<rate)]+=np.random.normal(0,4,self.geno[np.where(probailities<rate)].shape)
+        self.set_genotype(self.geno)
 
 class Pattern:
     def __init__(self,a,h,b,k):
@@ -370,7 +443,14 @@ if __name__ == "__main__":
     plt.plot(np.array(motors))
     plt.show()"""
 
-    b=Body(10,10)    
+    b=Body(10,10)  
+    ctrnn = CTRNNQuadruped()
+    imu_feedback = 0.1  # Example tilt correction
+    velocity_feedback = 0.2  # Example velocity correction
+
+    for t in range(100):  # Simulate for 100 steps
+        motor_angles = ctrnn.step(imu_feedback, velocity_feedback)
+        print(f"Step {t}, Motor Angles: {motor_angles}")  
 
 
 
