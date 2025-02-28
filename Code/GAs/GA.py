@@ -27,12 +27,9 @@ def fitness_(robot,history={}):
 
         fitness+=np.sum(distances)
         #orientationo over time#
-        deviations = np.linalg.norm(np.array(history['orientations']) - np.array(robot.start_orientation), axis=1)
-        stability_score = np.mean(deviations)
-        variance = np.var(np.array(history['orientations']), axis=0)
-        orientation_changes = np.diff(np.array(history['orientations']), axis=0)
-        jerkiness = np.sum(np.linalg.norm(orientation_changes, axis=1))#
-        fitness-=(stability_score-jerkiness)/100
+        stability_penalty = np.mean(np.linalg.norm(np.array(history['orientations']) - np.array(robot.start_orientation), axis=1))
+        jerkiness_penalty = np.sum(np.linalg.norm(np.diff(np.array(history['orientations']), axis=0), axis=1))
+        fitness -= 0.01 * stability_penalty + 0.001 * jerkiness_penalty
     else: #basic fitness
         distance = euclidean_distance(np.array([robot.start]),np.array([robot.getPos()]))
         orientation_penalty = np.linalg.norm(np.array(robot.getOrientation()) - np.array(robot.start_orientation)) 
@@ -78,14 +75,14 @@ for gen in range(generations):
     print("Generation ",gen+1,"Best fitness",np.max(fitnesses))
     ind1=np.random.randint(0,len(fitnesses)-1)
     ind2=np.random.randint(0,len(fitnesses)-1)
-    geno=population[ind1]
+    geno=deepcopy(population[ind1])
     f,_=env.runTrial(geno,100,delay=False,fitness=fitness_) #run trial
     if f>fitnesses[ind2]: #selection
         mutated=deepcopy(geno)
         mutated.mutate()
         fitnesses[ind2],motors=env.runTrial(mutated,100,delay=False,fitness=fitness_)
         population[ind2]=deepcopy(mutated)
-    else:
+    elif fitnesses[ind2]>f:
         mutated=deepcopy(geno)
         mutated.mutate()
         fitnesses[ind1],motors=env.runTrial(mutated,100,delay=False,fitness=fitness_)
@@ -93,15 +90,14 @@ for gen in range(generations):
     #if gen%10==0:
         #runTrial(population[np.where(fitnesses==np.max(fitnesses))[0][0]],150)
 #play the trials on reapeat
-    if gen%100==0:
-        
-        with open('/its/home/drs25/Documents/GitHub/Quadruped/models/genotypes_new.pkl', 'wb') as f:
+    if gen%10==0:
+        with open('/its/home/drs25/Documents/GitHub/Quadruped/models/genotypes_1.pkl', 'wb') as f:
             pickle.dump(population, f)
-        np.save("/its/home/drs25/Documents/GitHub/Quadruped/models/fitnesses_new",fitnesses)
+        np.save("/its/home/drs25/Documents/GitHub/Quadruped/models/fitnesses_1",fitnesses)
 
-p.disconnect()
-p.connect(p.GUI)
+
 env.runTrial(population[np.where(fitnesses==np.max(fitnesses))[0][0]],150)
+
 p.disconnect()
 
 

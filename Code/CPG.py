@@ -134,7 +134,7 @@ class Body(CPG):
         self.set_genotype(self.geno)
         self.legs=[deepcopy(self.cpg) for i in range(self.num_legs)]
 class CTRNNQuadruped:
-    def __init__(self, num_legs=4, num_motors_per_leg=3, dt=0.01):
+    def __init__(self, num_legs=4, num_motors_per_leg=3, dt=0.1):
         self.num_legs = num_legs
         self.num_motors = num_legs * num_motors_per_leg  # 12 motors total
         self.dt = dt  # Time step for integration
