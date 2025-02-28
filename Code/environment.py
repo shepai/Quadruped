@@ -108,6 +108,8 @@ class environment:
         if self.recording and self.record:
             p.stopStateLogging(self.video_log_id)
             self.recording=0
+    def close(self):
+        p.disconnect()
 
 class GYM(gym.Env):
     metadata = {"render_modes": ["human"], "render_fps": 30}
