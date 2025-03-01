@@ -7,6 +7,7 @@ class Quadruped:
         self.p=p
         self.motors=[-30, 0, 40, -30, 50, -10, 0, 10, 20, 30, -30, 50]  #positions in degrees
         self.neutral=[-30, 0, 40, -30, 50, -10, 0, 10, 20, 30, -30, 50] #positions in degrees
+        self.offset=90-np.array(self.motors)
         self.start=self.getPos()
         self.start_orientation=self.getOrientation()[0:3]
         self.floor=floor
@@ -21,8 +22,9 @@ class Quadruped:
                 targetPosition=maths.radians(self.neutral[joint_index])
             )
     def setPositions(self,positions): #positions in degrees
+        
         for i in range(len(positions)):
-           self.motors[i]=positions[i]
+           self.motors[i]=positions[i]-(self.offset[i]-90)
            self.p.setJointMotorControl2(
                 bodyUniqueId=self.robot_id,
                 jointIndex=i,
