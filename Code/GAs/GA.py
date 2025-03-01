@@ -1,11 +1,11 @@
 if __name__=="__main__":
     import sys
-    sys.path.insert(1, '/its/home/drs25/Documents/GitHub/Quadruped/Code')
+    sys.path.insert(1, '/its/home/drs25/Documents/GitHub/Quadruped/Code')#
+    sys.path.insert(1, 'C:/Users/dexte/Documents/GitHub/Quadruped/Code')
 from environment import *
 from CPG import *
 import time
 from copy import deepcopy
-from geno_generator import *
 import pickle
 
 env=environment(1)
