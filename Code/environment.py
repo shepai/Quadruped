@@ -93,7 +93,7 @@ class environment:
         return fitness(self.quad,history=history),a
     def step(self,agent,action,delay=False,gen=0):
         motor_positions=agent.get_positions(np.array(self.quad.motors))
-        self.quad.setPositions(motor_positions)
+        self.quad.setPositions(np.clip(motor_positions,0,180))
         for k in range(10): #update simulation
             p.stepSimulation()
             if delay: time.sleep(1./240.)
