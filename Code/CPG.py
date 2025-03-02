@@ -177,7 +177,7 @@ class CTRNNQuadruped:
         #apply velocity feedback for adaptive stride length (modify knees)
         velocity_correction = self.Kp_vel * velocity_feedback
         motor_commands[1::3] += velocity_correction  # Adjust knee motors
-
+        
         return np.clip(motor_commands, 0, 1)  # Return motor positions (normalized)
     def set_genotype(self, values):
         """Set CTRNN parameters from an evolutionary genotype."""
