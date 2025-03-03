@@ -159,7 +159,10 @@ class CTRNNQuadruped:
     def sigmoid(self, x):
         return 1 / (1 + np.exp(-x))
     def get_positions(self,inputs,motors=None):
-        return np.degrees(self.step(imu_feedback=0, velocity_feedback=0))
+        degrees=np.degrees(self.step(imu_feedback=0, velocity_feedback=0))/1.5
+        degrees=np.clip(degrees,0,180)
+        degrees[3:9]=-degrees[3:9] #try running this 
+        return degrees
     def step(self, imu_feedback, velocity_feedback):
         """Update the CTRNN for one timestep."""
         #compute neural activations (discrete update of CTRNN)
@@ -177,7 +180,6 @@ class CTRNNQuadruped:
         #apply velocity feedback for adaptive stride length (modify knees)
         velocity_correction = self.Kp_vel * velocity_feedback
         motor_commands[1::3] += velocity_correction  # Adjust knee motors
-        
         return np.clip(motor_commands, 0, 1)  # Return motor positions (normalized)
     def set_genotype(self, values):
         """Set CTRNN parameters from an evolutionary genotype."""
