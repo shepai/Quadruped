@@ -91,12 +91,12 @@ for gen in range(generations):
         #runTrial(population[np.where(fitnesses==np.max(fitnesses))[0][0]],150)
 #play the trials on reapeat
     if gen%10==0:
-        with open('/its/home/drs25/Documents/GitHub/Quadruped/models/genotypes_1.pkl', 'wb') as f:
+        with open('/its/home/drs25/Documents/GitHub/Quadruped/models/genotypes_4.pkl', 'wb') as f:
             pickle.dump(population, f)
-        np.save("/its/home/drs25/Documents/GitHub/Quadruped/models/fitnesses_1",fitnesses)
+        np.save("/its/home/drs25/Documents/GitHub/Quadruped/models/fitnesses_4",fitnesses)
 
 
-env.runTrial(population[np.where(fitnesses==np.max(fitnesses))[0][0]],150)
+env.runTrial(population[np.where(fitnesses==np.max(fitnesses))[0][0]],150,fitness=fitness_)
 
 p.disconnect()
 
