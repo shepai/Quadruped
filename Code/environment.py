@@ -19,7 +19,7 @@ except:
     from gymnasium import spaces
     from stable_baselines3 import PPO, A2C
 import torch
-def demo(variable):
+def demo(variable,history={}):
     return 0
 class environment:
     def __init__(self,show=False,record=False,filename=""):
@@ -68,6 +68,8 @@ class environment:
         history['orientations']=[]
         history['motors']=[]
         history['accumalitive_reward']=[]
+        history['self_collisions']=[]
+        history['feet']=[]
         self.reset()
         a=[]
         for i in range(generations*10):
@@ -77,7 +79,8 @@ class environment:
             history['orientations'].append(baseOrn[0:3])
             history['motors'].append(pos)
             history['accumalitive_reward'].append(fitness(self.quad,history=history))
-            
+            history['self_collisions'].append(self.quad.get_self_collision_count())
+            history['feet'].append(self.quad.getFeet())
             p.resetDebugVisualizerCamera( cameraDistance=0.3, cameraYaw=75, cameraPitch=-20, cameraTargetPosition=basePos) # fix camera onto model
             if self.quad.hasFallen():
                 break
@@ -88,12 +91,14 @@ class environment:
         history['orientations']=np.array(history['orientations'])
         history['motors']=np.array(history['motors'])
         history['accumalitive_reward']=np.array(history['accumalitive_reward'])
+        history['self_collisions']=np.array(history['self_collisions'])
+        history['feet']=np.array(history['feet'])
         filename = str(uuid.uuid4())
-        np.save("/its/home/drs25/Documents/GitHub/Quadruped/Code/data_collect_proj/trials/"+str(filename),history)
+        np.save("/its/home/drs25/Documents/GitHub/Quadruped/Code/data_collect_proj/trials_all/"+str(filename),history)
         return fitness(self.quad,history=history),a
     def step(self,agent,action,delay=False,gen=0):
         motor_positions=agent.get_positions(np.array(self.quad.motors))
-        self.quad.setPositions(np.clip(motor_positions,0,180))
+        self.quad.setPositions(motor_positions)
         for k in range(10): #update simulation
             p.stepSimulation()
             if delay: time.sleep(1./240.)
