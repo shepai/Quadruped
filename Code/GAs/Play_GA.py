@@ -4,18 +4,67 @@ if __name__=="__main__":
 from environment import *
 from CPG import *
 import pickle
-with open('/its/home/drs25/Documents/GitHub/Quadruped/genotypes.pkl', 'rb') as f:
+with open('/its/home/drs25/Documents/GitHub/Quadruped/models/genotypes_5.pkl', 'rb') as f:
     population = pickle.load(f)
-fitnesses=np.load("/its/home/drs25/Documents/GitHub/Quadruped/fitnesses.npy")
-
+fitnesses=np.load("/its/home/drs25/Documents/GitHub/Quadruped/models/fitnesses_5.npy")
+def fitness_(robot,history={}): 
+    fitness=0
+    #look at behaviour over time
+    if len(history.get('motors',[]))>0:
+        #calculate the phase length of the hip
+        oscillations = np.diff(np.array(history['motors'])[:,3])
+        zero_crossings = np.where(np.diff(np.sign(oscillations)) != 0)[0] + 1  # +1 to correct index shift
+        diff=np.diff(zero_crossings)
+        if type(np.diff(zero_crossings))==type([]) or type(np.diff(zero_crossings))==type(np.array([])): 
+            if len(np.diff(zero_crossings))>0:diff=np.average(diff)
+            else: diff=0
+        fitness+=diff/100 #more phase is betters
+        #distance over time
+        distances=euclidean_distance(np.array(history['positions']),np.array([robot.start]))
+        distances=np.diff(distances)
+        fitness+=np.sum(distances)
+        #orientationo over time#
+        stability_penalty = np.mean(np.linalg.norm(np.array(history['orientations']) - np.array(robot.start_orientation), axis=1))
+        jerkiness_penalty = np.sum(np.linalg.norm(np.diff(np.array(history['orientations']), axis=0), axis=1))
+        fitness -= 0.01 * stability_penalty + 0.001 * jerkiness_penalty
+    else: #basic fitness
+        distance = euclidean_distance(np.array([robot.start]),np.array([robot.getPos()]))
+        orientation_penalty = np.linalg.norm(np.array(robot.getOrientation()) - np.array(robot.start_orientation)) 
+        distance *= np.exp(-0.1 * orientation_penalty)  # Penalize unstable rotations
+        direction_vector = np.array(robot.getPos()[0:2]) - np.array(robot.start[0:2])
+        goal_direction = np.array([1, 0])  # Example: moving in +x direction
+        direction_reward = np.dot(direction_vector, goal_direction) / (np.linalg.norm(direction_vector) + 1e-6)
+        distance *= (1 + direction_reward)
+    if robot.hasFallen(): fitness=0
+    if type(fitness)!=type(0): 
+        try:
+            if type(fitness)==type([]): fitness=float(fitness[0])
+            else:fitness=float(fitness)
+        except:
+            print("shit",fitness,np.array(history['motors']).shape,np.array(history['positions']).shape,np.array(history['orientations']).shape)
+            fitness=0
+    if fitness<0: fitness=0
+    return fitness
 def euclidean_distance(point1, point2):
-    return np.sqrt(np.sum((np.array(point1) - np.array(point2)) ** 2))
-def fitness(robot):
-    distance = (euclidean_distance(robot.getPos()[0:2],robot.start[0:2])*0.8 - euclidean_distance(robot.start_orientation,robot.getOrientation())*0.1)-robot.get_self_collision_count()*0.01
-    if distance<0: distance=0
-    if robot.hasFallen(): return 0
-    return distance
+    return np.sqrt(np.sum((np.array(point1) - np.array(point2)) ** 2,axis=1))
 
-env=environment(True,1,"/its/home/drs25/Documents/GitHub/Quadruped/assets/videos/example_short.mp4")
-env.runTrial(population[np.where(fitnesses==np.max(fitnesses))[0][0]],50,delay=1)
+#find best fitness
+best=0
+index=0
+env=environment(0,0)
+print("\n\n\n\n\n\n\n")
+for i in range(len(fitnesses)):
+    print("------------>",i)
+    env.reset()
+    fit,mot=env.runTrial(population[i],50,delay=0,fitness=fitness_)
+    if fit>best:
+        best=fit
+        index=i
+
+env.close()
+
+env=environment(True,1,"/its/home/drs25/Documents/GitHub/Quadruped/assets/videos/example_5.mp4")
+fit,mot=env.runTrial(population[index],50,delay=1,fitness=fitness_)
 env.stop()
+
+np.save("/its/home/drs25/Documents/GitHub/Quadruped/Code/GAs/motors_5",np.array(mot))
