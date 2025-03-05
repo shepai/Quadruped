@@ -160,7 +160,7 @@ class CTRNNQuadruped:
         return 1 / (1 + np.exp(-x))
     def get_positions(self,inputs,motors=None):
         degrees=np.degrees(self.step(imu_feedback=0, velocity_feedback=0))/1.5
-        degrees=np.clip(degrees,0,180)
+        degrees=np.clip(degrees,-180,180)
         degrees[3:9]=-degrees[3:9] #try running this 
         return degrees
     def step(self, imu_feedback, velocity_feedback):

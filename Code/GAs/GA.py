@@ -25,7 +25,7 @@ def fitness_(robot,history={}):
         distances=euclidean_distance(np.array(history['positions']),np.array([robot.start]))
         distances=np.diff(distances)
 
-        fitness+=np.sum(distances)
+        fitness+=np.sum(distances)*100
         #orientationo over time#
         stability_penalty = np.mean(np.linalg.norm(np.array(history['orientations']) - np.array(robot.start_orientation), axis=1))
         jerkiness_penalty = np.sum(np.linalg.norm(np.diff(np.array(history['orientations']), axis=0), axis=1))
@@ -91,9 +91,9 @@ for gen in range(generations):
         #runTrial(population[np.where(fitnesses==np.max(fitnesses))[0][0]],150)
 #play the trials on reapeat
     if gen%10==0:
-        with open('/its/home/drs25/Documents/GitHub/Quadruped/models/genotypes_5.pkl', 'wb') as f:
+        with open('/its/home/drs25/Documents/GitHub/Quadruped/models/genotypes_7.pkl', 'wb') as f:
             pickle.dump(population, f)
-        np.save("/its/home/drs25/Documents/GitHub/Quadruped/models/fitnesses_5",fitnesses)
+        np.save("/its/home/drs25/Documents/GitHub/Quadruped/models/fitnesses_7",fitnesses)
 
 
 env.runTrial(population[np.where(fitnesses==np.max(fitnesses))[0][0]],150,fitness=fitness_)

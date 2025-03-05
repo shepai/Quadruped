@@ -4,9 +4,9 @@ if __name__=="__main__":
 from environment import *
 from CPG import *
 import pickle
-with open('/its/home/drs25/Documents/GitHub/Quadruped/models/genotypes_5.pkl', 'rb') as f:
+with open('/its/home/drs25/Documents/GitHub/Quadruped/models/genotypes_7.pkl', 'rb') as f:
     population = pickle.load(f)
-fitnesses=np.load("/its/home/drs25/Documents/GitHub/Quadruped/models/fitnesses_5.npy")
+fitnesses=np.load("/its/home/drs25/Documents/GitHub/Quadruped/models/fitnesses_7.npy")
 def fitness_(robot,history={}): 
     fitness=0
     #look at behaviour over time
@@ -63,8 +63,8 @@ for i in range(len(fitnesses)):
 
 env.close()
 
-env=environment(True,1,"/its/home/drs25/Documents/GitHub/Quadruped/assets/videos/example_5.mp4")
+env=environment(True,1,"/its/home/drs25/Documents/GitHub/Quadruped/assets/videos/example_7.mp4")
 fit,mot=env.runTrial(population[index],50,delay=1,fitness=fitness_)
 env.stop()
 
-np.save("/its/home/drs25/Documents/GitHub/Quadruped/Code/GAs/motors_5",np.array(mot))
+np.save("/its/home/drs25/Documents/GitHub/Quadruped/Code/GAs/motors_7",np.array(mot))
