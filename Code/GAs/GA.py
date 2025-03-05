@@ -14,18 +14,17 @@ def fitness_(robot,history={}):
     #look at behaviour over time
     if len(history.get('motors',[]))>0:
         #calculate the phase length of the hip
-        oscillations = np.diff(np.array(history['motors'])[:,3])
+        """oscillations = np.diff(np.array(history['motors'])[:,3])
         zero_crossings = np.where(np.diff(np.sign(oscillations)) != 0)[0] + 1  # +1 to correct index shift
         diff=np.diff(zero_crossings)
         if type(np.diff(zero_crossings))==type([]) or type(np.diff(zero_crossings))==type(np.array([])): 
             if len(np.diff(zero_crossings))>0:diff=np.average(diff)
             else: diff=0
-        fitness+=diff/10 #more phase is betters
+        fitness+=diff/10 #more phase is betters"""
         #distance over time
         distances=euclidean_distance(np.array(history['positions']),np.array([robot.start]))
         distances=np.diff(distances)
-
-        fitness+=np.sum(distances)*100
+        fitness+=np.sum(distances)
         #orientationo over time#
         stability_penalty = np.mean(np.linalg.norm(np.array(history['orientations']) - np.array(robot.start_orientation), axis=1))
         jerkiness_penalty = np.sum(np.linalg.norm(np.diff(np.array(history['orientations']), axis=0), axis=1))
@@ -91,9 +90,9 @@ for gen in range(generations):
         #runTrial(population[np.where(fitnesses==np.max(fitnesses))[0][0]],150)
 #play the trials on reapeat
     if gen%10==0:
-        with open('/its/home/drs25/Documents/GitHub/Quadruped/models/genotypes_7.pkl', 'wb') as f:
+        with open('/its/home/drs25/Documents/GitHub/Quadruped/models/genotypes_8.pkl', 'wb') as f:
             pickle.dump(population, f)
-        np.save("/its/home/drs25/Documents/GitHub/Quadruped/models/fitnesses_7",fitnesses)
+        np.save("/its/home/drs25/Documents/GitHub/Quadruped/models/fitnesses_8",fitnesses)
 
 
 env.runTrial(population[np.where(fitnesses==np.max(fitnesses))[0][0]],150,fitness=fitness_)

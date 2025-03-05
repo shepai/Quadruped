@@ -94,8 +94,8 @@ class environment:
         history['self_collisions']=np.array(history['self_collisions'])
         history['feet']=np.array(history['feet'])
         filename = str(uuid.uuid4())
-        np.save("/its/home/drs25/Documents/GitHub/Quadruped/Code/data_collect_proj/trials_all/"+str(filename),history)
-        return fitness(self.quad,history=history),a
+        #np.save("/its/home/drs25/Documents/GitHub/Quadruped/Code/data_collect_proj/trials_all/"+str(filename),history)
+        return fitness(self.quad,history=history),history
     def step(self,agent,action,delay=False,gen=0):
         motor_positions=agent.get_positions(np.array(self.quad.motors))
         self.quad.setPositions(motor_positions)
