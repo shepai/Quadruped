@@ -4,21 +4,21 @@ if __name__=="__main__":
 from environment import *
 from CPG import *
 import pickle
-with open('/its/home/drs25/Documents/GitHub/Quadruped/models/genotypes_7.pkl', 'rb') as f:
+with open('/its/home/drs25/Documents/GitHub/Quadruped/models/genotypes_8.pkl', 'rb') as f:
     population = pickle.load(f)
-fitnesses=np.load("/its/home/drs25/Documents/GitHub/Quadruped/models/fitnesses_7.npy")
+fitnesses=np.load("/its/home/drs25/Documents/GitHub/Quadruped/models/fitnesses_8.npy")
 def fitness_(robot,history={}): 
     fitness=0
     #look at behaviour over time
     if len(history.get('motors',[]))>0:
         #calculate the phase length of the hip
-        oscillations = np.diff(np.array(history['motors'])[:,3])
+        """oscillations = np.diff(np.array(history['motors'])[:,3])
         zero_crossings = np.where(np.diff(np.sign(oscillations)) != 0)[0] + 1  # +1 to correct index shift
         diff=np.diff(zero_crossings)
         if type(np.diff(zero_crossings))==type([]) or type(np.diff(zero_crossings))==type(np.array([])): 
             if len(np.diff(zero_crossings))>0:diff=np.average(diff)
             else: diff=0
-        fitness+=diff/100 #more phase is betters
+        fitness+=diff/10 #more phase is betters"""
         #distance over time
         distances=euclidean_distance(np.array(history['positions']),np.array([robot.start]))
         distances=np.diff(distances)
@@ -53,7 +53,7 @@ best=0
 index=0
 env=environment(0,0)
 print("\n\n\n\n\n\n\n")
-for i in range(len(fitnesses)):
+for i in range(len(fitnesses)): #
     print("------------>",i)
     env.reset()
     fit,mot=env.runTrial(population[i],50,delay=0,fitness=fitness_)
@@ -62,9 +62,8 @@ for i in range(len(fitnesses)):
         index=i
 
 env.close()
-
-env=environment(True,1,"/its/home/drs25/Documents/GitHub/Quadruped/assets/videos/example_7.mp4")
-fit,mot=env.runTrial(population[index],50,delay=1,fitness=fitness_)
+print(index)
+env=environment(True,1,"/its/home/drs25/Documents/GitHub/Quadruped/assets/videos/example_8.mp4")
+fit,mot=env.runTrial(population[index],100,delay=1,fitness=fitness_)
 env.stop()
-
-np.save("/its/home/drs25/Documents/GitHub/Quadruped/Code/GAs/motors_7",np.array(mot))
+np.savez("/its/home/drs25/Documents/GitHub/Quadruped/Code/GAs/motors_8",mot,allow_pickle=True)
