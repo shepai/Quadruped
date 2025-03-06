@@ -22,7 +22,6 @@ class Quadruped:
                 targetPosition=maths.radians(self.neutral[joint_index])
             )
     def setPositions(self,positions): #positions in degrees
-        
         for i in range(len(positions)):
            self.motors[i]=positions[i]-(self.offset[i]-90)
            self.p.setJointMotorControl2(
