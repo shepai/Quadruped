@@ -10,6 +10,7 @@ import numpy as np
 import os
 import random
 from copy import deepcopy
+import uuid
 try:
     import gym
     from gym import spaces
@@ -18,7 +19,7 @@ except:
     from gymnasium import spaces
     from stable_baselines3 import PPO, A2C
 import torch
-def demo(variable):
+def demo(variable,history={}):
     return 0
 class environment:
     def __init__(self,show=False,record=False,filename=""):
@@ -34,7 +35,7 @@ class environment:
         self.record=record
         self.filename=filename
         self.recording=0
-        
+        self.history={}
     def reset(self):
         p.resetSimulation()
         p.setGravity(0, 0, -9.81)
@@ -54,31 +55,66 @@ class environment:
         if self.record:
             self.video_log_id = p.startStateLogging(p.STATE_LOGGING_VIDEO_MP4, self.filename)
             self.recording=1
-    def step(self,delay=0,T=1,dt=1):
+    """def step(self,delay=0,T=1,dt=1):
         t=0
         while t<T:
             p.stepSimulation()
             if delay: time.sleep(1./240.)
             else: p.setTimeStep(1./240.)
-            t+=dt
+            t+=dt"""
     def runTrial(self,agent,generations,delay=False,fitness=demo):
+        history={}
+        history['positions']=[]
+        history['orientations']=[]
+        history['motors']=[]
+        history['accumalitive_reward']=[]
+        history['self_collisions']=[]
+        history['feet']=[]
         self.reset()
-        for i in range(generations):
-            motor_positions=agent.get_positions(self.quad.motors,motors=self.quad.motors)
-            self.quad.setPositions(motor_positions)
-            for k in range(10): #update simulation
-                self.step(delay=delay)
-                basePos, baseOrn = p.getBasePositionAndOrientation(self.robot_id) # Get model position
-                p.resetDebugVisualizerCamera( cameraDistance=0.3, cameraYaw=75, cameraPitch=-20, cameraTargetPosition=basePos) # fix camera onto model
-                if self.quad.hasFallen():
-                    break
+        a=[]
+        for i in range(generations*10):
+            pos=self.step(agent,0,delay=delay)
+            basePos, baseOrn = p.getBasePositionAndOrientation(self.robot_id) # Get model position
+            history['positions'].append(basePos)
+            history['orientations'].append(baseOrn[0:3])
+            history['motors'].append(pos)
+            history['accumalitive_reward'].append(fitness(self.quad,history=history))
+            history['self_collisions'].append(self.quad.get_self_collision_count())
+            history['feet'].append(self.quad.getFeet())
+            p.resetDebugVisualizerCamera( cameraDistance=0.3, cameraYaw=75, cameraPitch=-20, cameraTargetPosition=basePos) # fix camera onto model
             if self.quad.hasFallen():
                 break
-        return fitness(self.quad)
+            if self.quad.hasFallen():
+                break
+            a.append(pos)
+        history['positions']=np.array(history['positions'])
+        history['orientations']=np.array(history['orientations'])
+        history['motors']=np.array(history['motors'])
+        history['accumalitive_reward']=np.array(history['accumalitive_reward'])
+        history['self_collisions']=np.array(history['self_collisions'])
+        history['feet']=np.array(history['feet'])
+        filename = str(uuid.uuid4())
+        #np.save("/its/home/drs25/Documents/GitHub/Quadruped/Code/data_collect_proj/trials_all/"+str(filename),history)
+        return fitness(self.quad,history=history),history
+    def step(self,agent,action,delay=False,gen=0):
+        motor_positions=agent.get_positions(np.array(self.quad.motors))
+        self.quad.setPositions(motor_positions)
+        for k in range(10): #update simulation
+            p.stepSimulation()
+            if delay: time.sleep(1./240.)
+            else: p.setTimeStep(1./240.)
+            basePos, baseOrn = p.getBasePositionAndOrientation(self.robot_id) # Get model position
+            p.resetDebugVisualizerCamera( cameraDistance=0.3, cameraYaw=75, cameraPitch=-20, cameraTargetPosition=basePos) # fix camera onto model
+            if self.quad.hasFallen():
+                
+                break
+        return motor_positions
     def stop(self):
         if self.recording and self.record:
             p.stopStateLogging(self.video_log_id)
             self.recording=0
+    def close(self):
+        p.disconnect()
 
 class GYM(gym.Env):
     metadata = {"render_modes": ["human"], "render_fps": 30}
@@ -114,8 +150,9 @@ class GYM(gym.Env):
         self.filename=filename
         self.time_step=0
     def step(self,action):
+        action=torch.tensor(action)
         self.quad.setPositions(action)
-        for i in range(50):
+        for i in range(100):
             p.stepSimulation()
             if self.delay:
                 time.sleep(1./240.)
@@ -138,7 +175,7 @@ class GYM(gym.Env):
         # Penalize deviation from a straight line (both x and y directions)
         deviation = np.abs(curr[0] - self.start_position[0]) + np.abs(curr[1] - self.start_position[1])
         penalty = 0.5 * deviation  # Adjust the penalty factor as needed
-        reward -= penalty
+        reward -= penalty + .01*torch.sum(torch.abs(action))
         if self.view:
             basePos, baseOrn = p.getBasePositionAndOrientation(self.id) # Get model position
             self.p.resetDebugVisualizerCamera( cameraDistance=0.3, cameraYaw=75, cameraPitch=-20, cameraTargetPosition=basePos) # fix camera onto model
