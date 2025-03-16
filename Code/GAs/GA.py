@@ -2,6 +2,8 @@ if __name__=="__main__":
     import sys
     sys.path.insert(1, '/its/home/drs25/Documents/GitHub/Quadruped/Code')#
     sys.path.insert(1, 'C:/Users/dexte/Documents/GitHub/Quadruped/Code')
+datapath="/its/home/drs25/Documents/GitHub/Quadruped/"
+datapath="C:/Users/dexte/Documents/GitHub/Quadruped/"
 from environment import *
 from CPG import *
 import time
@@ -22,13 +24,15 @@ def fitness_(robot,history={}):
             else: diff=0
         fitness+=diff/10 #more phase is betters"""
         #distance over time
-        distances=euclidean_distance(np.array(history['positions']),np.array([robot.start]))
-        distances=np.diff(distances)
-        fitness+=np.sum(distances)
+        distances=np.array(history['positions'])-np.array([robot.start])#euclidean_distance(np.array(history['positions']),np.array([robot.start]))
+        distancesX=np.diff(distances[:,0])
+        distancesY=np.diff(distances[:,1])
+        distancesZ=np.diff(distances[:,2])
+        fitness+=distancesX - (distancesY+distancesZ)/10 #np.sum(distances)
         #orientationo over time#
-        stability_penalty = np.mean(np.linalg.norm(np.array(history['orientations']) - np.array(robot.start_orientation), axis=1))
+        """stability_penalty = np.mean(np.linalg.norm(np.array(history['orientations']) - np.array(robot.start_orientation), axis=1))
         jerkiness_penalty = np.sum(np.linalg.norm(np.diff(np.array(history['orientations']), axis=0), axis=1))
-        fitness -= 0.01 * stability_penalty + 0.001 * jerkiness_penalty
+        fitness -= 0.01 * stability_penalty + 0.001 * jerkiness_penalty"""
     else: #basic fitness
         distance = euclidean_distance(np.array([robot.start]),np.array([robot.getPos()]))
         orientation_penalty = np.linalg.norm(np.array(robot.getOrientation()) - np.array(robot.start_orientation)) 
@@ -49,7 +53,6 @@ def fitness_(robot,history={}):
     return fitness
 def euclidean_distance(point1, point2):
     return np.sqrt(np.sum((np.array(point1) - np.array(point2)) ** 2,axis=1))
-
 #agent goes in population generation
 #initial
 population_size=50
@@ -90,9 +93,9 @@ for gen in range(generations):
         #runTrial(population[np.where(fitnesses==np.max(fitnesses))[0][0]],150)
 #play the trials on reapeat
     if gen%10==0:
-        with open('/its/home/drs25/Documents/GitHub/Quadruped/models/genotypes_8.pkl', 'wb') as f:
+        with open(datapath+'/models/genotypes_4.pkl', 'wb') as f:
             pickle.dump(population, f)
-        np.save("/its/home/drs25/Documents/GitHub/Quadruped/models/fitnesses_8",fitnesses)
+        np.save(datapath+"/models/fitnesses_4",fitnesses)
 
 
 env.runTrial(population[np.where(fitnesses==np.max(fitnesses))[0][0]],150,fitness=fitness_)
