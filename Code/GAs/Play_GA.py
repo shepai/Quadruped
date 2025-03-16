@@ -1,12 +1,15 @@
 if __name__=="__main__":
     import sys
     sys.path.insert(1, '/its/home/drs25/Documents/GitHub/Quadruped/Code')
+    sys.path.insert(1, 'C:/Users/dexte/Documents/GitHub/Quadruped/Code')
+datapath="/its/home/drs25/Documents/GitHub/Quadruped/"
+datapath="C:/Users/dexte/Documents/GitHub/Quadruped/"
 from environment import *
 from CPG import *
 import pickle
-with open('/its/home/drs25/Documents/GitHub/Quadruped/models/genotypes_8.pkl', 'rb') as f:
+with open(datapath+'/models/genotypes_4.pkl', 'rb') as f:
     population = pickle.load(f)
-fitnesses=np.load("/its/home/drs25/Documents/GitHub/Quadruped/models/fitnesses_8.npy")
+fitnesses=np.load(datapath+"/models/fitnesses_4.npy")
 def fitness_(robot,history={}): 
     fitness=0
     #look at behaviour over time
@@ -20,13 +23,15 @@ def fitness_(robot,history={}):
             else: diff=0
         fitness+=diff/10 #more phase is betters"""
         #distance over time
-        distances=euclidean_distance(np.array(history['positions']),np.array([robot.start]))
-        distances=np.diff(distances)
-        fitness+=np.sum(distances)
+        distances=np.array(history['positions'])-np.array([robot.start])#euclidean_distance(np.array(history['positions']),np.array([robot.start]))
+        distancesX=distances[-1][0]
+        distancesY=distances[-1][1]
+        distancesZ=distances[-1][2]
+        fitness+=distancesX - (distancesY+distancesZ)/10 #np.sum(distances)
         #orientationo over time#
-        stability_penalty = np.mean(np.linalg.norm(np.array(history['orientations']) - np.array(robot.start_orientation), axis=1))
+        """stability_penalty = np.mean(np.linalg.norm(np.array(history['orientations']) - np.array(robot.start_orientation), axis=1))
         jerkiness_penalty = np.sum(np.linalg.norm(np.diff(np.array(history['orientations']), axis=0), axis=1))
-        fitness -= 0.01 * stability_penalty + 0.001 * jerkiness_penalty
+        fitness -= 0.01 * stability_penalty + 0.001 * jerkiness_penalty"""
     else: #basic fitness
         distance = euclidean_distance(np.array([robot.start]),np.array([robot.getPos()]))
         orientation_penalty = np.linalg.norm(np.array(robot.getOrientation()) - np.array(robot.start_orientation)) 
@@ -63,7 +68,7 @@ for i in range(len(fitnesses)): #
 
 env.close()
 print(index)
-env=environment(True,1,"/its/home/drs25/Documents/GitHub/Quadruped/assets/videos/example_8.mp4")
+env=environment(True,1,datapath+"/assets/videos/example_4.mp4")
 fit,mot=env.runTrial(population[index],100,delay=1,fitness=fitness_)
 env.stop()
-np.savez("/its/home/drs25/Documents/GitHub/Quadruped/Code/GAs/motors_8",mot,allow_pickle=True)
+np.savez(datapath+"/Code/GAs/motors_4",mot,allow_pickle=True)
