@@ -15,32 +15,11 @@ def fitness_(robot,history={}):
     fitness=0
     #look at behaviour over time
     if len(history.get('motors',[]))>0:
-        #calculate the phase length of the hip
-        """oscillations = np.diff(np.array(history['motors'])[:,3])
-        zero_crossings = np.where(np.diff(np.sign(oscillations)) != 0)[0] + 1  # +1 to correct index shift
-        diff=np.diff(zero_crossings)
-        if type(np.diff(zero_crossings))==type([]) or type(np.diff(zero_crossings))==type(np.array([])): 
-            if len(np.diff(zero_crossings))>0:diff=np.average(diff)
-            else: diff=0
-        fitness+=diff/10 #more phase is betters"""
-        #distance over time
         distances=np.array(history['positions'])-np.array([robot.start])#euclidean_distance(np.array(history['positions']),np.array([robot.start]))
-        distancesX=np.diff(distances[:,0])
-        distancesY=np.diff(distances[:,1])
-        distancesZ=np.diff(distances[:,2])
+        distancesX=distances[-1][0]
+        distancesY=distances[-1][1]
+        distancesZ=distances[-1][2]
         fitness+=distancesX - (distancesY+distancesZ)/10 #np.sum(distances)
-        #orientationo over time#
-        """stability_penalty = np.mean(np.linalg.norm(np.array(history['orientations']) - np.array(robot.start_orientation), axis=1))
-        jerkiness_penalty = np.sum(np.linalg.norm(np.diff(np.array(history['orientations']), axis=0), axis=1))
-        fitness -= 0.01 * stability_penalty + 0.001 * jerkiness_penalty"""
-    else: #basic fitness
-        distance = euclidean_distance(np.array([robot.start]),np.array([robot.getPos()]))
-        orientation_penalty = np.linalg.norm(np.array(robot.getOrientation()) - np.array(robot.start_orientation)) 
-        distance *= np.exp(-0.1 * orientation_penalty)  # Penalize unstable rotations
-        direction_vector = np.array(robot.getPos()[0:2]) - np.array(robot.start[0:2])
-        goal_direction = np.array([1, 0])  # Example: moving in +x direction
-        direction_reward = np.dot(direction_vector, goal_direction) / (np.linalg.norm(direction_vector) + 1e-6)
-        distance *= (1 + direction_reward)
     if robot.hasFallen(): fitness=0
     if type(fitness)!=type(0): 
         try:
@@ -51,6 +30,9 @@ def fitness_(robot,history={}):
             fitness=0
     if fitness<0: fitness=0
     return fitness
+def euclidean_distance(point1, point2):
+    return np.sqrt(np.sum((np.array(point1) - np.array(point2)) ** 2,axis=1))
+
 def euclidean_distance(point1, point2):
     return np.sqrt(np.sum((np.array(point1) - np.array(point2)) ** 2,axis=1))
 #agent goes in population generation
@@ -93,9 +75,9 @@ for gen in range(generations):
         #runTrial(population[np.where(fitnesses==np.max(fitnesses))[0][0]],150)
 #play the trials on reapeat
     if gen%10==0:
-        with open(datapath+'/models/genotypes_4.pkl', 'wb') as f:
+        with open(datapath+'/models/genotypes_5.pkl', 'wb') as f:
             pickle.dump(population, f)
-        np.save(datapath+"/models/fitnesses_4",fitnesses)
+        np.save(datapath+"/models/fitnesses_5",fitnesses)
 
 
 env.runTrial(population[np.where(fitnesses==np.max(fitnesses))[0][0]],150,fitness=fitness_)
