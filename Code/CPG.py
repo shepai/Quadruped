@@ -174,7 +174,7 @@ class CTRNNQuadruped:
         self.phases += self.dt * self.omega
         oscillation = np.sin(self.phases)
         #compute motor commands (combining CTRNN output and oscillations)
-        motor_commands = self.outputs + 0.5 * oscillation
+        motor_commands = np.concatenate([self.outputs[0:3],self.outputs[0:3],self.outputs[0:3],self.outputs[0:3]]) + 0.5 * oscillation
         #apply IMU feedback for balance correction (modify hip joints)
         imu_correction = self.Kp_imu * imu_feedback  # Pitch correction
         motor_commands[::3] += imu_correction  # Adjust hips
@@ -342,80 +342,83 @@ class NN(nn.Module):
         """Mutate the model's parameters by adding noise."""
         mutated_genotype = self.genotype + np.random.normal(0, std, self.genotype.shape)
         self.set_genotype(mutated_genotype)
-from stable_baselines3.common.policies import ActorCriticPolicy
-from stable_baselines3.common.torch_layers import BaseFeaturesExtractor
-from torch.distributions import Categorical, Normal
 
-class CustomNNPolicy(ActorCriticPolicy):
-    def __init__(self, observation_space, action_space, lr_schedule, device=None,*args, **kwargs):
-        # Initialize the base ActorCriticPolicy
-        super(CustomNNPolicy, self).__init__(
-            observation_space,
-            action_space,
-            lr_schedule,
-            *args,
-            **kwargs,
-        )
-        self.device_ = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        #device=torch.device("cpu")
-        print(f"Using device: {self.device_}")
-        # Define the custom neural network
-        self.net = NN(inp=observation_space.shape[0], hidden=64).to(self.device_)
-        self.sig = Pattern(0, 0, 0, 0)  # External object, assumed defined elsewhere
-        self.val = 0  # Keeps track of the step for position encoding
+try:
+    from stable_baselines3.common.policies import ActorCriticPolicy
+    from stable_baselines3.common.torch_layers import BaseFeaturesExtractor
+    from torch.distributions import Categorical, Normal
 
-    def forward(self, obs, *args, **kwargs):
-        """Forward pass through policy and value networks."""
-        if type(obs)!=type(torch.tensor([])):
-            obs=obs.sample()
-        obs=torch.tensor(obs,dtype=torch.float32).to(self.device_)
-        features = self.net(obs)  # Pass observation through the custom NN
-        actions=self.forward_positions(features)
-        mean, log_std = self.action_head(action).chunk(2, dim=-1)  # Assuming two outputs: mean and log std
-        std = torch.exp(log_std)  # Exponentiate to get the standard deviation
-        
-        # Create a Normal distribution
-        dist = Normal(mean, std)
-        
-        # Sample an action
-        action = dist.sample()
-        
-        # Calculate log probability of the sampled action
-        log_prob = dist.log_prob(action).sum(dim=-1)  # Sum over dimensions of the action space
-        
-        # Optional: You can store the action or do something with it
-        self.val += 1  # Update your custom value if needed
-        return actions, features, log_prob
-    def forward_positions(self,x,motors=0):
-        positions = np.zeros(12)
-        x=x.flatten()
-        for j, i in enumerate(range(0, 12, 3)):  # Loop through legs assigning phase encoding
-            self.sig.set_param(*x[0:4])
-            positions[i] = self.sig.forward(x[j] + self.val)
-            self.sig.set_param(*x[4:8])
-            positions[i + 1] = self.sig.forward(x[j] + self.val)
-            self.sig.set_param(*x[8:12])
-            positions[i + 2] = self.sig.forward(x[j] + self.val)
-        
-        positions = motors + ((positions)/5)*50
-        positions[positions < 0] = 0
-        positions[positions > 50] = 50
-        return torch.tensor(positions).to(self.device_)
-    def evaluate_actions(self, obs, actions):
-        """Evaluate the actions for the given observations."""
-        features = self.net(obs)
-        actions=self.forward_positions(features)
-        
-        distribution = Categorical(logits=actions)
-        log_probs = distribution.log_prob(features)
-        entropy = distribution.entropy()
-        
-        return actions, log_probs, entropy
-    def get_positions(self, obs, motors=0):
-        """Generate positions for the robot's motors."""
-        positions = self.net.get_positions(obs, motors=motors)
-        return positions
+    class CustomNNPolicy(ActorCriticPolicy):
+        def __init__(self, observation_space, action_space, lr_schedule, device=None,*args, **kwargs):
+            # Initialize the base ActorCriticPolicy
+            super(CustomNNPolicy, self).__init__(
+                observation_space,
+                action_space,
+                lr_schedule,
+                *args,
+                **kwargs,
+            )
+            self.device_ = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+            #device=torch.device("cpu")
+            print(f"Using device: {self.device_}")
+            # Define the custom neural network
+            self.net = NN(inp=observation_space.shape[0], hidden=64).to(self.device_)
+            self.sig = Pattern(0, 0, 0, 0)  # External object, assumed defined elsewhere
+            self.val = 0  # Keeps track of the step for position encoding
 
+        def forward(self, obs, *args, **kwargs):
+            """Forward pass through policy and value networks."""
+            if type(obs)!=type(torch.tensor([])):
+                obs=obs.sample()
+            obs=torch.tensor(obs,dtype=torch.float32).to(self.device_)
+            features = self.net(obs)  # Pass observation through the custom NN
+            actions=self.forward_positions(features)
+            mean, log_std = self.action_head(action).chunk(2, dim=-1)  # Assuming two outputs: mean and log std
+            std = torch.exp(log_std)  # Exponentiate to get the standard deviation
+            
+            # Create a Normal distribution
+            dist = Normal(mean, std)
+            
+            # Sample an action
+            action = dist.sample()
+            
+            # Calculate log probability of the sampled action
+            log_prob = dist.log_prob(action).sum(dim=-1)  # Sum over dimensions of the action space
+            
+            # Optional: You can store the action or do something with it
+            self.val += 1  # Update your custom value if needed
+            return actions, features, log_prob
+        def forward_positions(self,x,motors=0):
+            positions = np.zeros(12)
+            x=x.flatten()
+            for j, i in enumerate(range(0, 12, 3)):  # Loop through legs assigning phase encoding
+                self.sig.set_param(*x[0:4])
+                positions[i] = self.sig.forward(x[j] + self.val)
+                self.sig.set_param(*x[4:8])
+                positions[i + 1] = self.sig.forward(x[j] + self.val)
+                self.sig.set_param(*x[8:12])
+                positions[i + 2] = self.sig.forward(x[j] + self.val)
+            
+            positions = motors + ((positions)/5)*50
+            positions[positions < 0] = 0
+            positions[positions > 50] = 50
+            return torch.tensor(positions).to(self.device_)
+        def evaluate_actions(self, obs, actions):
+            """Evaluate the actions for the given observations."""
+            features = self.net(obs)
+            actions=self.forward_positions(features)
+            
+            distribution = Categorical(logits=actions)
+            log_probs = distribution.log_prob(features)
+            entropy = distribution.entropy()
+            
+            return actions, log_probs, entropy
+        def get_positions(self, obs, motors=0):
+            """Generate positions for the robot's motors."""
+            positions = self.net.get_positions(obs, motors=motors)
+            return positions
+except:
+    pass
 if __name__ == "__main__":
     import matplotlib.pyplot as plt
     import matplotlib
