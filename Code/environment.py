@@ -1,5 +1,5 @@
-path="C:/Users/dexte/Documents/GitHub/Quadruped/Quadruped_sim/urdf/"
-path="/its/home/drs25/Quadruped/Quadruped_sim/PressTip/urdf/"
+path="C:/Users/dexte/Documents/GitHub/Quadruped/Quadruped_sim/PressTip/urdf/"
+#path="/its/home/drs25/Quadruped/Quadruped_sim/PressTip/urdf/"
 #path="C:/Users/dexte/Documents/GitHub/Quadruped/Quadruped_sim/PressTip/urdf/"
 import pybullet as p
 import pybullet_data
@@ -17,7 +17,10 @@ try:
 except:
     import gymnasium as gym
     from gymnasium import spaces
-    from stable_baselines3 import PPO, A2C
+    try:
+        from stable_baselines3 import PPO, A2C
+    except:
+        pass
 import torch
 def demo(variable,history={}):
     return 0
@@ -28,7 +31,11 @@ class environment:
         else: p.connect(p.DIRECT)
         p.setAdditionalSearchPath(pybullet_data.getDataPath())
         p.setGravity(0, 0, -9.81)
-        p.configureDebugVisualizer(p.COV_ENABLE_GUI,0)
+        p.configureDebugVisualizer(p.COV_ENABLE_GUI, 1)  # Ensure GUI is enabled
+        p.configureDebugVisualizer(p.COV_ENABLE_SEGMENTATION_MARK_PREVIEW, 0)  # Hide Explorer
+        p.configureDebugVisualizer(p.COV_ENABLE_RGB_BUFFER_PREVIEW, 0)  # Hide RGB view
+        p.configureDebugVisualizer(p.COV_ENABLE_DEPTH_BUFFER_PREVIEW, 0)  # Hide Depth view
+
         self.robot_id=None
         self.plane_id=None
         self.quad=None
@@ -36,11 +43,17 @@ class environment:
         self.filename=filename
         self.recording=0
         self.history={}
+        if self.show:
+            self.x_slider = p.addUserDebugParameter("dt", -5, 5, 0.1)
     def reset(self):
         p.resetSimulation()
         p.setGravity(0, 0, -9.81)
         self.plane_id = p.loadURDF('plane.urdf')
-        p.configureDebugVisualizer(p.COV_ENABLE_GUI,0)
+        p.configureDebugVisualizer(p.COV_ENABLE_GUI, 1)  # Ensure GUI is enabled
+        p.configureDebugVisualizer(p.COV_ENABLE_SEGMENTATION_MARK_PREVIEW, 0)  # Hide Explorer
+        p.configureDebugVisualizer(p.COV_ENABLE_RGB_BUFFER_PREVIEW, 0)  # Hide RGB view
+        p.configureDebugVisualizer(p.COV_ENABLE_DEPTH_BUFFER_PREVIEW, 0)  # Hide Depth view
+
         initial_position = [0, 0, 5.8]  # x=1, y=2, z=0.5
         initial_orientation = p.getQuaternionFromEuler([0, 0, 0])  # No rotation (Euler angles to quaternion)
         flags = p.URDF_USE_SELF_COLLISION
@@ -55,6 +68,8 @@ class environment:
         if self.record:
             self.video_log_id = p.startStateLogging(p.STATE_LOGGING_VIDEO_MP4, self.filename)
             self.recording=1
+        #if self.show:
+            #self.x_slider = p.addUserDebugParameter("dt", -2, 2, 0.1)
     """def step(self,delay=0,T=1,dt=1):
         t=0
         while t<T:
@@ -74,6 +89,7 @@ class environment:
         a=[]
         for i in range(generations*10):
             pos=self.step(agent,0,delay=delay)
+            pos[[2,5,8,11]]=180-pos[[1,4,7,10]]
             basePos, baseOrn = p.getBasePositionAndOrientation(self.robot_id) # Get model position
             history['positions'].append(basePos)
             history['orientations'].append(baseOrn[0:3])
@@ -97,6 +113,8 @@ class environment:
         #np.save("/its/home/drs25/Documents/GitHub/Quadruped/Code/data_collect_proj/trials_all/"+str(filename),history)
         return fitness(self.quad,history=history),history
     def step(self,agent,action,delay=False,gen=0):
+        if self.show:
+            agent.dt=p.readUserDebugParameter(self.x_slider)
         motor_positions=agent.get_positions(np.array(self.quad.motors))
         self.quad.setPositions(motor_positions)
         for k in range(10): #update simulation

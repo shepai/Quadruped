@@ -9,7 +9,7 @@ from CPG import *
 import pickle
 with open(datapath+'/models/genotypes_4.pkl', 'rb') as f:
     population = pickle.load(f)
-fitnesses=np.load(datapath+"/models/fitnesses_4.npy")
+fitnesses=np.load(datapath+"/models/fitnesses_5.npy")
 def fitness_(robot,history={}): 
     fitness=0
     #look at behaviour over time
@@ -56,7 +56,7 @@ def euclidean_distance(point1, point2):
 #find best fitness
 best=0
 index=0
-env=environment(0,0)
+"""env=environment(0,0)
 print("\n\n\n\n\n\n\n")
 for i in range(len(fitnesses)): #
     print("------------>",i)
@@ -66,9 +66,11 @@ for i in range(len(fitnesses)): #
         best=fit
         index=i
 
-env.close()
+env.close()"""
 print(index)
-env=environment(True,1,datapath+"/assets/videos/example_4.mp4")
+index=41
+env=environment(True,1,datapath+"/assets/videos/example_5_dt_higher.mp4")
+population[index].dt=1
 fit,mot=env.runTrial(population[index],100,delay=1,fitness=fitness_)
 env.stop()
-np.savez(datapath+"/Code/GAs/motors_4",mot,allow_pickle=True)
+np.savez(datapath+"/Code/GAs/motors_5",mot,allow_pickle=True)
