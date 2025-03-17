@@ -10,7 +10,7 @@ import time
 from copy import deepcopy
 import pickle
 
-env=environment(1)
+env=environment(0)
 def fitness_(robot,history={}): 
     fitness=0
     #look at behaviour over time
@@ -47,7 +47,7 @@ for i in range(population_size):
     population.append(deepcopy(b))"""
     
 fitnesses=np.zeros((population_size,))
-generations=3000
+generations=800
 t_start=time.time()
 #get fitnesses
 for i in range(len(fitnesses)):
@@ -81,7 +81,7 @@ for gen in range(generations):
 
 
 env.runTrial(population[np.where(fitnesses==np.max(fitnesses))[0][0]],150,fitness=fitness_)
-
+print("top fitness:",population[np.where(fitnesses==np.max(fitnesses))[0][0]])
 p.disconnect()
 
 
