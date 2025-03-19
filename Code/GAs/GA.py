@@ -45,7 +45,7 @@ def RUN(dt=0.1,sho=0,trial=0):
     for i in range(len(fitnesses)):
         fitnesses[i],_=env.runTrial(population[i],100,delay=0,fitness=fitness_)
         print(i,"/",len(fitnesses), fitnesses[i])
-
+    history=np.zeros((generations,))
     for gen in range(generations):
         clear = lambda: os.system('clear')
         if gen%50==0:
@@ -64,11 +64,13 @@ def RUN(dt=0.1,sho=0,trial=0):
             mutated.mutate()
             fitnesses[ind1],motors=env.runTrial(mutated,100,delay=False,fitness=fitness_)
             population[ind1]=deepcopy(mutated)
+        history[gen]=np.max(fitnesses)
     #play the trials on reapeat
         if gen%10==0:
             with open(datapath+'/models/genotypes_dt'+str(dt)+"_"+str(trial)+'.pkl', 'wb') as f:
                 pickle.dump(population, f)
             np.save(datapath+'/models/fitnesses_dt'+str(dt)+"_"+str(trial),fitnesses)
+            np.save(datapath+'/models/history_dt'+str(dt)+"_"+str(trial),history)
 
 
     env.runTrial(population[np.where(fitnesses==np.max(fitnesses))[0][0]],150,fitness=fitness_)
@@ -79,6 +81,9 @@ def RUN(dt=0.1,sho=0,trial=0):
     t_passed=time.time()-t_start
     print("********************************\n\n\n\nTIME IT TOOK:",t_passed/(60*60),"Hours")
 
-for trial in range(3,4):
+"""for trial in range(3,4):
     for i in np.arange(0.05,1.5,0.05):
-        RUN(dt=i,sho=0,trial=trial)
+        RUN(dt=i,sho=0,trial=trial)"""
+
+for i in range(5):
+    RUN(dt=0.1,sho=0,trial="6_neurons_"+str(i))
