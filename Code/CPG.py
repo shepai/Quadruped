@@ -138,13 +138,13 @@ class CTRNNQuadruped:
         self.num_legs = num_legs
         self.num_motors = num_legs * num_motors_per_leg  # 12 motors total
         self.dt = dt  # Time step for integration
-        
+        self.num_neurons=6
         #initialize CTRNN parameters
-        self.tau = np.ones(self.num_motors) * 0.5  # Time constants (modifiable via evolution)
-        self.weights = np.random.uniform(-1, 1, (self.num_motors, self.num_motors))  # Synaptic weights
-        self.biases = np.zeros(self.num_motors)  # Bias terms
-        self.activations = np.zeros(self.num_motors)  # Neuron activations
-        self.outputs = np.zeros(self.num_motors)  # Motor output (joint angles)
+        self.tau = np.ones(self.num_neurons) * 0.5  # Time constants (modifiable via evolution)
+        self.weights = np.random.uniform(-1, 1, (self.num_neurons, self.num_neurons))  # Synaptic weights
+        self.biases = np.zeros(self.num_neurons)  # Bias terms
+        self.activations = np.zeros(self.num_neurons)  # Neuron activations
+        self.outputs = np.zeros(self.num_neurons)  # Motor output (joint angles)
 
         #frequency and phase offsets for oscillatory behavior
         self.omega = np.random.uniform(0.8, 1.2, self.num_motors)  # Oscillation frequencies
