@@ -10,28 +10,28 @@ import time
 from copy import deepcopy
 import pickle
 def fitness_(robot,history={}): 
-        fitness=0
-        #look at behaviour over time
-        if len(history.get('motors',[]))>0:
-            distances=np.array(history['positions'])-np.array([robot.start])#euclidean_distance(np.array(history['positions']),np.array([robot.start]))
-            distancesX=distances[-1][0]
-            distancesY=distances[-1][1]
-            distancesZ=distances[-1][2]
-            fitness+=distancesX - (distancesY+distancesZ)/10 #np.sum(distances)
-        if robot.hasFallen(): fitness=0
-        if type(fitness)!=type(0): 
-            try:
-                if type(fitness)==type([]): fitness=float(fitness[0])
-                else:fitness=float(fitness)
-            except:
-                print("shit",fitness,np.array(history['motors']).shape,np.array(history['positions']).shape,np.array(history['orientations']).shape)
-                fitness=0
-        if fitness<0: fitness=0
-        return fitness
-    def euclidean_distance(point1, point2):
-        return np.sqrt(np.sum((np.array(point1) - np.array(point2)) ** 2,axis=1))
-def RUN(dt=0.1,sho=0,):
-    env=environment(0)
+    fitness=0
+    #look at behaviour over time
+    if len(history.get('motors',[]))>0:
+        distances=np.array(history['positions'])-np.array([robot.start])#euclidean_distance(np.array(history['positions']),np.array([robot.start]))
+        distancesX=distances[-1][0]
+        distancesY=distances[-1][1]
+        distancesZ=distances[-1][2]
+        fitness+=distancesX - (distancesY+distancesZ)/10 #np.sum(distances)
+    if robot.hasFallen(): fitness=0
+    if type(fitness)!=type(0): 
+        try:
+            if type(fitness)==type([]): fitness=float(fitness[0])
+            else:fitness=float(fitness)
+        except:
+            print("shit",fitness,np.array(history['motors']).shape,np.array(history['positions']).shape,np.array(history['orientations']).shape)
+            fitness=0
+    if fitness<0: fitness=0
+    return fitness
+def euclidean_distance(point1, point2):
+    return np.sqrt(np.sum((np.array(point1) - np.array(point2)) ** 2,axis=1))
+def RUN(dt=0.1,sho=0,trial=0):
+    env=environment(sho)
     #agent goes in population generation
     #initial
     population_size=50
@@ -39,7 +39,7 @@ def RUN(dt=0.1,sho=0,):
     population=[CTRNNQuadruped(dt=0.2) for _ in range(population_size)]#np.random.choice([50, 20, 0,0,0,0,-20],(150,15,12)) #12 motors, 15 steps
         
     fitnesses=np.zeros((population_size,))
-    generations=500
+    generations=250
     t_start=time.time()
     #get fitnesses
     for i in range(len(fitnesses)):
@@ -48,7 +48,8 @@ def RUN(dt=0.1,sho=0,):
 
     for gen in range(generations):
         clear = lambda: os.system('clear')
-        print("Generation ",gen+1,"Best fitness",np.max(fitnesses))
+        if gen%50==0:
+            print("Generation ",gen+1,"Best fitness",np.max(fitnesses))
         ind1=np.random.randint(0,len(fitnesses)-1)
         ind2=np.random.randint(0,len(fitnesses)-1)
         if fitnesses[ind1]>fitnesses[ind2]: #selection
@@ -65,9 +66,9 @@ def RUN(dt=0.1,sho=0,):
             population[ind1]=deepcopy(mutated)
     #play the trials on reapeat
         if gen%10==0:
-            with open(datapath+'/models/genotypes_dt0.2=.pkl', 'wb') as f:
+            with open(datapath+'/models/genotypes_dt'+str(dt)+"_"+str(trial)+'.pkl', 'wb') as f:
                 pickle.dump(population, f)
-            np.save(datapath+"/models/fitnesses_dt0.2",fitnesses)
+            np.save(datapath+'/models/fitnesses_dt'+str(dt)+"_"+str(trial),fitnesses)
 
 
     env.runTrial(population[np.where(fitnesses==np.max(fitnesses))[0][0]],150,fitness=fitness_)
@@ -77,3 +78,7 @@ def RUN(dt=0.1,sho=0,):
 
     t_passed=time.time()-t_start
     print("********************************\n\n\n\nTIME IT TOOK:",t_passed/(60*60),"Hours")
+
+for trial in range(3,4):
+    for i in np.arange(0.05,1.5,0.05):
+        RUN(dt=i,sho=0,trial=trial)
