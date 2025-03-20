@@ -45,6 +45,19 @@ class environment:
         self.history={}
         if self.show:
             self.x_slider = p.addUserDebugParameter("dt", -5, 5, 0.1)
+    def take_agent_snapshot(self,p, agent_id, alpha=0.1, width=640, height=480):
+        # Make all objects except the agent transparent
+        num_bodies = p.getNumBodies()
+        for i in range(num_bodies):
+            body_id = p.getBodyUniqueId(i)
+            if body_id != agent_id:
+                visual_shapes = p.getVisualShapeData(body_id)
+                for visual in visual_shapes:
+                    p.changeVisualShape(body_id, visual[1], rgbaColor=[1, 1, 1, alpha])  # Set transparency
+        # Capture snapshot from the current camera view
+        _, _, img_arr, _, _ = p.getCameraImage(width, height)
+        # Convert the image array to a NumPy array
+        return np.array(img_arr, dtype=np.uint8)
     def reset(self):
         p.resetSimulation()
         p.setGravity(0, 0, -9.81)
@@ -77,7 +90,7 @@ class environment:
             if delay: time.sleep(1./240.)
             else: p.setTimeStep(1./240.)
             t+=dt"""
-    def runTrial(self,agent,generations,delay=False,fitness=demo):
+    def runTrial(self,agent,generations,delay=False,fitness=demo,photos=-1):
         history={}
         history['positions']=[]
         history['orientations']=[]
@@ -87,8 +100,12 @@ class environment:
         history['feet']=[]
         self.reset()
         a=[]
+        photos_l=[]
         for i in range(generations*10):
             pos=self.step(agent,0,delay=delay)
+            if photos>-1 and i%photos==0:
+                print("snap")
+                photos_l.append(self.take_agent_snapshot(p,self.robot_id))
             pos[[2,5,8,11]]=180-pos[[1,4,7,10]]
             basePos, baseOrn = p.getBasePositionAndOrientation(self.robot_id) # Get model position
             history['positions'].append(basePos)
@@ -111,7 +128,7 @@ class environment:
         history['feet']=np.array(history['feet'])
         filename = str(uuid.uuid4())
         #np.save("/its/home/drs25/Documents/GitHub/Quadruped/Code/data_collect_proj/trials_all/"+str(filename),history)
-        return fitness(self.quad,history=history),history
+        return fitness(self.quad,history=history),history,photos_l
     def step(self,agent,action,delay=False,gen=0):
         if self.show:
             agent.dt=p.readUserDebugParameter(self.x_slider)
