@@ -7,9 +7,9 @@ datapath="C:/Users/dexte/Documents/GitHub/Quadruped/"
 from environment import *
 from CPG import *
 import pickle
-with open(datapath+'/models/genotypes_dt0.2=.pkl', 'rb') as f:
+with open(datapath+'/models/genotypes_dt0.1_6_neurons_0.pkl', 'rb') as f:
     population = pickle.load(f)
-fitnesses=np.load(datapath+"/models/fitnesses_dt0.2.npy")
+fitnesses=np.load(datapath+"/models/fitnesses_dt0.1_6_neurons_0.npy")
 def fitness_(robot,history={}): 
     fitness=0
     #look at behaviour over time
@@ -36,20 +36,14 @@ def euclidean_distance(point1, point2):
 #find best fitness
 best=0
 index=0
-"""env=environment(0,0)
-print("\n\n\n\n\n\n\n")
-for i in range(len(fitnesses)): #
-    print("------------>",i)
-    env.reset()
-    fit,mot=env.runTrial(population[i],50,delay=0,fitness=fitness_)
-    if fit>best:
-        best=fit
-        index=i
 
-env.close()"""
 index=np.argmax(fitnesses)
-env=environment(True,1,datapath+"/assets/videos/example_dt0.2.mp4")
+env=environment(True,1,datapath+"/assets/videos/example_dt0.2_6_neurons_0.mp4")
 population[index].dt=1
-fit,mot=env.runTrial(population[index],100,delay=1,fitness=fitness_)
+fit,mot,photos=env.runTrial(population[index],50,delay=0,fitness=fitness_,photos=10)
 env.stop()
-np.savez(datapath+"/Code/GAs/motors_dt0.2",mot,allow_pickle=True)
+np.savez(datapath+"/Code/GAs/motors_dt0.2_6_neurons_0",mot,allow_pickle=True)
+
+if len(photos)>1:
+    print("saving photos")
+    np.save(datapath+"/assets/frames",np.array(photos))

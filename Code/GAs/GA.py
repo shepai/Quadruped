@@ -43,7 +43,7 @@ def RUN(dt=0.1,sho=0,trial=0):
     t_start=time.time()
     #get fitnesses
     for i in range(len(fitnesses)):
-        fitnesses[i],_=env.runTrial(population[i],100,delay=0,fitness=fitness_)
+        fitnesses[i],_,_2=env.runTrial(population[i],100,delay=0,fitness=fitness_)
         print(i,"/",len(fitnesses), fitnesses[i])
     history=np.zeros((generations,))
     for gen in range(generations):
@@ -56,13 +56,13 @@ def RUN(dt=0.1,sho=0,trial=0):
             geno=deepcopy(population[ind1])
             mutated=deepcopy(geno)
             mutated.mutate()
-            fitnesses[ind2],motors=env.runTrial(mutated,100,delay=False,fitness=fitness_)
+            fitnesses[ind2],motors,_=env.runTrial(mutated,100,delay=False,fitness=fitness_)
             population[ind2]=deepcopy(mutated)
         elif fitnesses[ind2]>fitnesses[ind1]:
             geno=deepcopy(population[ind2])
             mutated=deepcopy(geno)
             mutated.mutate()
-            fitnesses[ind1],motors=env.runTrial(mutated,100,delay=False,fitness=fitness_)
+            fitnesses[ind1],motors,_=env.runTrial(mutated,100,delay=False,fitness=fitness_)
             population[ind1]=deepcopy(mutated)
         history[gen]=np.max(fitnesses)
     #play the trials on reapeat
@@ -85,5 +85,5 @@ def RUN(dt=0.1,sho=0,trial=0):
     for i in np.arange(0.05,1.5,0.05):
         RUN(dt=i,sho=0,trial=trial)"""
 
-for i in range(5):
+for i in range(1,20):
     RUN(dt=0.1,sho=0,trial="6_neurons_"+str(i))
