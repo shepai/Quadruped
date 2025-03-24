@@ -3,7 +3,7 @@ if __name__=="__main__":
     sys.path.insert(1, '/its/home/drs25/Documents/GitHub/Quadruped/Code')#
     sys.path.insert(1, 'C:/Users/dexte/Documents/GitHub/Quadruped/Code')
 datapath="/its/home/drs25/Documents/GitHub/Quadruped/"
-datapath="C:/Users/dexte/Documents/GitHub/Quadruped/"
+#datapath="C:/Users/dexte/Documents/GitHub/Quadruped/"
 from environment import *
 from CPG import *
 import time
@@ -30,7 +30,7 @@ def fitness_(robot,history={}):
     return fitness
 def euclidean_distance(point1, point2):
     return np.sqrt(np.sum((np.array(point1) - np.array(point2)) ** 2,axis=1))
-def RUN(dt=0.1,sho=0,trial=0):
+def RUN(dt=0.1,sho=0,trial=0,generations=250):
     env=environment(sho)
     #agent goes in population generation
     #initial
@@ -39,7 +39,7 @@ def RUN(dt=0.1,sho=0,trial=0):
     population=[CTRNNQuadruped(dt=0.2) for _ in range(population_size)]#np.random.choice([50, 20, 0,0,0,0,-20],(150,15,12)) #12 motors, 15 steps
         
     fitnesses=np.zeros((population_size,))
-    generations=250
+    
     t_start=time.time()
     #get fitnesses
     for i in range(len(fitnesses)):
@@ -85,5 +85,7 @@ def RUN(dt=0.1,sho=0,trial=0):
     for i in np.arange(0.05,1.5,0.05):
         RUN(dt=i,sho=0,trial=trial)"""
 
-for i in range(1,20):
-    RUN(dt=0.1,sho=0,trial="6_neurons_"+str(i))
+#for i in range(1,20):
+#    RUN(dt=0.1,sho=0,trial="6_neurons_"+str(i))
+
+RUN(dt=0.1,sho=0,trial="6_neurons_"+str(1))
