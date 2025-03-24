@@ -141,7 +141,7 @@ class CTRNNQuadruped:
         self.num_neurons=6
         #initialize CTRNN parameters
         self.tau = np.ones(self.num_neurons) * 0.5  # Time constants (modifiable via evolution)
-        self.weights = np.random.uniform(-1, 1, (self.num_neurons, self.num_neurons))  # Synaptic weights
+        self.weights = np.random.uniform(-1, 1, (self.num_neurons, self.num_neurons))  # Synaptic weights .normal(0,2,(self.num_neurons, self.num_neurons))#
         self.biases = np.zeros(self.num_neurons)  # Bias terms
         self.activations = np.zeros(self.num_neurons)  # Neuron activations
         self.outputs = np.zeros(self.num_neurons)  # Motor output (joint angles)
