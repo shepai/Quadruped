@@ -1,5 +1,5 @@
 path="C:/Users/dexte/Documents/GitHub/Quadruped/Quadruped_sim/PressTip/urdf/"
-#path="/its/home/drs25/Quadruped/Quadruped_sim/PressTip/urdf/"
+path="/its/home/drs25/Quadruped/Quadruped_sim/PressTip/urdf/"
 #path="C:/Users/dexte/Documents/GitHub/Quadruped/Quadruped_sim/PressTip/urdf/"
 import pybullet as p
 import pybullet_data
@@ -25,7 +25,7 @@ import torch
 def demo(variable,history={}):
     return 0
 class environment:
-    def __init__(self,show=False,record=False,filename=""):
+    def __init__(self,show=False,record=False,filename="",friction=0.5):
         self.show=show
         if show: p.connect(p.GUI)
         else: p.connect(p.DIRECT)
@@ -35,7 +35,7 @@ class environment:
         p.configureDebugVisualizer(p.COV_ENABLE_SEGMENTATION_MARK_PREVIEW, 0)  # Hide Explorer
         p.configureDebugVisualizer(p.COV_ENABLE_RGB_BUFFER_PREVIEW, 0)  # Hide RGB view
         p.configureDebugVisualizer(p.COV_ENABLE_DEPTH_BUFFER_PREVIEW, 0)  # Hide Depth view
-
+        self.friction=friction
         self.robot_id=None
         self.plane_id=None
         self.quad=None
@@ -66,12 +66,14 @@ class environment:
         p.configureDebugVisualizer(p.COV_ENABLE_SEGMENTATION_MARK_PREVIEW, 0)  # Hide Explorer
         p.configureDebugVisualizer(p.COV_ENABLE_RGB_BUFFER_PREVIEW, 0)  # Hide RGB view
         p.configureDebugVisualizer(p.COV_ENABLE_DEPTH_BUFFER_PREVIEW, 0)  # Hide Depth view
-
+        p.changeDynamics(self.plane_id, -1, lateralFriction=self.friction)
+        p.setPhysicsEngineParameter(enableConeFriction=0)
+        p.changeDynamics(self.plane_id, -1, lateralFriction=self.friction)
         initial_position = [0, 0, 5.8]  # x=1, y=2, z=0.5
         initial_orientation = p.getQuaternionFromEuler([0, 0, 0])  # No rotation (Euler angles to quaternion)
         flags = p.URDF_USE_SELF_COLLISION
         self.robot_id = p.loadURDF(path+"Quadruped_prestip.urdf", initial_position, initial_orientation,flags=flags)
-        
+        p.changeDynamics(self.robot_id, -1, lateralFriction=self.friction)
         self.quad=Quadruped.Quadruped(p,self.robot_id,self.plane_id)
         self.quad.neutral=[-30, 0, 40, -30, 50, -10, 0, 10, 20, 30, -30, 50]
         self.quad.reset()
