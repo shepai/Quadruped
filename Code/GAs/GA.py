@@ -9,6 +9,7 @@ from CPG import *
 import time
 from copy import deepcopy
 import pickle
+import os
 def fitness_(robot,history={}): 
     fitness=0
     #look at behaviour over time
@@ -113,24 +114,24 @@ def F3(robot,history={}):
     return fitness
 def euclidean_distance(point1, point2):
     return np.sqrt(np.sum((np.array(point1) - np.array(point2)) ** 2,axis=1))
-def RUN(dt=0.1,sho=0,trial=0,generations=300,fit=fitness_):
-    env=environment(sho)
+def RUN(dt=0.1,sho=0,trial=0,generations=300,fit=fitness_,fric=0.5):
+    env=environment(sho,friction=fric)
     #agent goes in population generation
     #initial
     population_size=50
     #g=geno_gen(6,population_size)
-    population=[CTRNNQuadruped(dt=0.2) for _ in range(population_size)]#np.random.choice([50, 20, 0,0,0,0,-20],(150,15,12)) #12 motors, 15 steps
+    population=[CTRNNQuadruped(dt=dt) for _ in range(population_size)]#np.random.choice([50, 20, 0,0,0,0,-20],(150,15,12)) #12 motors, 15 steps
         
     fitnesses=np.zeros((population_size,))
     
     t_start=time.time()
     #get fitnesses
     for i in range(len(fitnesses)):
-        fitnesses[i],_,_2=env.runTrial(population[i],100,delay=0,fitness=fitness_)
-        print(i,"/",len(fitnesses), fitnesses[i])
+        fitnesses[i],_,_2=env.runTrial(population[i],100,delay=0,fitness=fit)
+        #print(i,"/",len(fitnesses), fitnesses[i])
     history=np.zeros((generations,))
     for gen in range(generations):
-        clear = lambda: os.system('clear')
+        
         if gen%50==0:
             print("Generation ",gen+1,"Best fitness",np.max(fitnesses))
         ind1=np.random.randint(0,len(fitnesses)-1)
@@ -139,38 +140,50 @@ def RUN(dt=0.1,sho=0,trial=0,generations=300,fit=fitness_):
             geno=deepcopy(population[ind1])
             mutated=deepcopy(geno)
             mutated.mutate()
-            fitnesses[ind2],motors,_=env.runTrial(mutated,100,delay=False,fitness=fitness_)
+            fitnesses[ind2],motors,_=env.runTrial(mutated,100,delay=False,fitness=fit)
             population[ind2]=deepcopy(mutated)
         elif fitnesses[ind2]>fitnesses[ind1]:
             geno=deepcopy(population[ind2])
             mutated=deepcopy(geno)
             mutated.mutate()
-            fitnesses[ind1],motors,_=env.runTrial(mutated,100,delay=False,fitness=fitness_)
+            fitnesses[ind1],motors,_=env.runTrial(mutated,100,delay=False,fitness=fit)
             population[ind1]=deepcopy(mutated)
         history[gen]=np.max(fitnesses)
     #play the trials on reapeat
         if gen%10==0:
-            with open(datapath+'/models/genotypes_dt'+str(dt)+"_"+str(trial)+'.pkl', 'wb') as f:
+            with open(datapath+'/models/genotypes_dt'+str(dt)+"_"+str(trial)+str(fric)+'.pkl', 'wb') as f:
                 pickle.dump(population, f)
-            np.save(datapath+'/models/fitnesses_dt'+str(dt)+"_"+str(trial),fitnesses)
-            np.save(datapath+'/models/history_dt'+str(dt)+"_"+str(trial),history)
+            np.save(datapath+'/models/fitnesses_dt'+str(dt)+"_"+str(trial)+str(fric),fitnesses)
+            np.save(datapath+'/models/history_dt'+str(dt)+"_"+str(trial)+str(fric),history)
 
 
-    env.runTrial(population[np.where(fitnesses==np.max(fitnesses))[0][0]],150,fitness=fitness_)
+    env.runTrial(population[np.where(fitnesses==np.max(fitnesses))[0][0]],150,fitness=fit)
     print("top fitness:",np.max(fitnesses))
     p.disconnect()
 
 
     t_passed=time.time()-t_start
     print("********************************\n\n\n\nTIME IT TOOK:",t_passed/(60*60),"Hours")
+DT=0.1
+for _ in range(20):
+    os.system('cls' if os.name == 'nt' else 'clear')
+    print("PROGRESS:",_,"/ 20")
+    RUN(dt=DT,sho=0,trial="_6_neurons_"+str(_)+"_F1",fit=F1)
+    RUN(dt=DT,sho=0,trial="_6_neurons_"+str(_)+"_F2",fit=F2)
+    RUN(dt=DT,sho=0,trial="_6_neurons_"+str(_)+"_F3",fit=F3)
 
 """for trial in range(3,4):
     for i in np.arange(0.05,1.5,0.05):
         RUN(dt=i,sho=0,trial=trial)"""
+"""c=0
+for i in range(0,40):
+   for j in np.arange(0,1,0.05):
+    os.system('cls' if os.name == 'nt' else 'clear')
+    calc=len(range(0,40))*len( np.arange(0,1,0.05))
+    print(i,j,c/calc *100,"%")
+    RUN(dt=0.1,sho=0,trial="6_neurons_"+str(i)+"_friction",fit=F1,fric=j)
+    c+=1"""
 
-for i in range(1,20):
-   RUN(dt=0.1,sho=0,trial="6_neurons_"+str(i)+"_F1",fit=F1)
-   RUN(dt=0.1,sho=0,trial="6_neurons_"+str(i)+"_F2",fit=F2)
-   RUN(dt=0.1,sho=0,trial="6_neurons_"+str(i)+"_F3",fit=F3)
 
-
+"""for i in range(0,20):
+    RUN(dt=0.1,sho=0,trial="6_neurons_"+str(i)+"_rocky",fit=F2,fric=j)"""
