@@ -1,4 +1,4 @@
-path="C:/Users/dexte/Documents/GitHub/Quadruped/Quadruped_sim/urdf/"
+path="C:/Users/dexte/Documents/GitHub/Quadruped/Quadruped_sim/PressTip/urdf/"
 path="/its/home/drs25/Quadruped/Quadruped_sim/PressTip/urdf/"
 #path="C:/Users/dexte/Documents/GitHub/Quadruped/Quadruped_sim/PressTip/urdf/"
 import pybullet as p
@@ -17,18 +17,25 @@ try:
 except:
     import gymnasium as gym
     from gymnasium import spaces
-    from stable_baselines3 import PPO, A2C
+    try:
+        from stable_baselines3 import PPO, A2C
+    except:
+        pass
 import torch
 def demo(variable,history={}):
     return 0
 class environment:
-    def __init__(self,show=False,record=False,filename=""):
+    def __init__(self,show=False,record=False,filename="",friction=0.5):
         self.show=show
         if show: p.connect(p.GUI)
         else: p.connect(p.DIRECT)
         p.setAdditionalSearchPath(pybullet_data.getDataPath())
         p.setGravity(0, 0, -9.81)
-        p.configureDebugVisualizer(p.COV_ENABLE_GUI,0)
+        p.configureDebugVisualizer(p.COV_ENABLE_GUI, 1)  # Ensure GUI is enabled
+        p.configureDebugVisualizer(p.COV_ENABLE_SEGMENTATION_MARK_PREVIEW, 0)  # Hide Explorer
+        p.configureDebugVisualizer(p.COV_ENABLE_RGB_BUFFER_PREVIEW, 0)  # Hide RGB view
+        p.configureDebugVisualizer(p.COV_ENABLE_DEPTH_BUFFER_PREVIEW, 0)  # Hide Depth view
+        self.friction=friction
         self.robot_id=None
         self.plane_id=None
         self.quad=None
@@ -36,16 +43,37 @@ class environment:
         self.filename=filename
         self.recording=0
         self.history={}
+        if self.show:
+            self.x_slider = p.addUserDebugParameter("dt", -5, 5, 0.1)
+    def take_agent_snapshot(self,p, agent_id, alpha=0.1, width=640, height=480):
+        # Make all objects except the agent transparent
+        num_bodies = p.getNumBodies()
+        for i in range(num_bodies):
+            body_id = p.getBodyUniqueId(i)
+            if body_id != agent_id:
+                visual_shapes = p.getVisualShapeData(body_id)
+                for visual in visual_shapes:
+                    p.changeVisualShape(body_id, visual[1], rgbaColor=[1, 1, 1, alpha])  # Set transparency
+        # Capture snapshot from the current camera view
+        _, _, img_arr, _, _ = p.getCameraImage(width, height)
+        # Convert the image array to a NumPy array
+        return np.array(img_arr, dtype=np.uint8)
     def reset(self):
         p.resetSimulation()
         p.setGravity(0, 0, -9.81)
         self.plane_id = p.loadURDF('plane.urdf')
-        p.configureDebugVisualizer(p.COV_ENABLE_GUI,0)
+        p.configureDebugVisualizer(p.COV_ENABLE_GUI, 1)  # Ensure GUI is enabled
+        p.configureDebugVisualizer(p.COV_ENABLE_SEGMENTATION_MARK_PREVIEW, 0)  # Hide Explorer
+        p.configureDebugVisualizer(p.COV_ENABLE_RGB_BUFFER_PREVIEW, 0)  # Hide RGB view
+        p.configureDebugVisualizer(p.COV_ENABLE_DEPTH_BUFFER_PREVIEW, 0)  # Hide Depth view
+        p.changeDynamics(self.plane_id, -1, lateralFriction=self.friction)
+        p.setPhysicsEngineParameter(enableConeFriction=0)
+        p.changeDynamics(self.plane_id, -1, lateralFriction=self.friction)
         initial_position = [0, 0, 5.8]  # x=1, y=2, z=0.5
         initial_orientation = p.getQuaternionFromEuler([0, 0, 0])  # No rotation (Euler angles to quaternion)
         flags = p.URDF_USE_SELF_COLLISION
         self.robot_id = p.loadURDF(path+"Quadruped_prestip.urdf", initial_position, initial_orientation,flags=flags)
-        
+        p.changeDynamics(self.robot_id, -1, lateralFriction=self.friction)
         self.quad=Quadruped.Quadruped(p,self.robot_id,self.plane_id)
         self.quad.neutral=[-30, 0, 40, -30, 50, -10, 0, 10, 20, 30, -30, 50]
         self.quad.reset()
@@ -55,6 +83,8 @@ class environment:
         if self.record:
             self.video_log_id = p.startStateLogging(p.STATE_LOGGING_VIDEO_MP4, self.filename)
             self.recording=1
+        #if self.show:
+            #self.x_slider = p.addUserDebugParameter("dt", -2, 2, 0.1)
     """def step(self,delay=0,T=1,dt=1):
         t=0
         while t<T:
@@ -62,7 +92,7 @@ class environment:
             if delay: time.sleep(1./240.)
             else: p.setTimeStep(1./240.)
             t+=dt"""
-    def runTrial(self,agent,generations,delay=False,fitness=demo):
+    def runTrial(self,agent,generations,delay=False,fitness=demo,photos=-1):
         history={}
         history['positions']=[]
         history['orientations']=[]
@@ -72,8 +102,13 @@ class environment:
         history['feet']=[]
         self.reset()
         a=[]
+        photos_l=[]
         for i in range(generations*10):
             pos=self.step(agent,0,delay=delay)
+            if photos>-1 and i%photos==0:
+                print("snap")
+                photos_l.append(self.take_agent_snapshot(p,self.robot_id))
+            pos[[2,5,8,11]]=180-pos[[1,4,7,10]]
             basePos, baseOrn = p.getBasePositionAndOrientation(self.robot_id) # Get model position
             history['positions'].append(basePos)
             history['orientations'].append(baseOrn[0:3])
@@ -95,8 +130,10 @@ class environment:
         history['feet']=np.array(history['feet'])
         filename = str(uuid.uuid4())
         #np.save("/its/home/drs25/Documents/GitHub/Quadruped/Code/data_collect_proj/trials_all/"+str(filename),history)
-        return fitness(self.quad,history=history),history
+        return fitness(self.quad,history=history),history,photos_l
     def step(self,agent,action,delay=False,gen=0):
+        if self.show:
+            agent.dt=p.readUserDebugParameter(self.x_slider)
         motor_positions=agent.get_positions(np.array(self.quad.motors))
         self.quad.setPositions(motor_positions)
         for k in range(10): #update simulation
