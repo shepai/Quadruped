@@ -25,7 +25,7 @@ import torch
 def demo(variable,history={}):
     return 0
 class environment:
-    def __init__(self,show=False,record=False,filename="",friction=0.5):
+    def __init__(self,show=False,record=False,filename="",friction=0.5,UI=1):
         self.show=show
         if show: p.connect(p.GUI)
         else: p.connect(p.DIRECT)
@@ -43,8 +43,10 @@ class environment:
         self.filename=filename
         self.recording=0
         self.history={}
-        if self.show:
+        self.UI=UI
+        if self.show and UI:
             self.x_slider = p.addUserDebugParameter("dt", -5, 5, 0.1)
+            
     def take_agent_snapshot(self,p, agent_id, alpha=0.1, width=640, height=480):
         # Make all objects except the agent transparent
         num_bodies = p.getNumBodies()
@@ -132,7 +134,7 @@ class environment:
         #np.save("/its/home/drs25/Documents/GitHub/Quadruped/Code/data_collect_proj/trials_all/"+str(filename),history)
         return fitness(self.quad,history=history),history,photos_l
     def step(self,agent,action,delay=False,gen=0):
-        if self.show:
+        if self.show and self.UI:
             agent.dt=p.readUserDebugParameter(self.x_slider)
         motor_positions=agent.get_positions(np.array(self.quad.motors))
         self.quad.setPositions(motor_positions)
