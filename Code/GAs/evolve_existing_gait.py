@@ -5,12 +5,14 @@ import cv2
 import sys
 sys.path.insert(1, '/its/home/drs25/Documents/GitHub/Quadruped/Code')
 sys.path.insert(1, 'C:/Users/dexte/Documents/GitHub/Quadruped/Code')
+sys.path.insert(1, '/its/home/drs25/Quadruped/Code')
 from PIL import Image
 from environment import *
 from CPG import *
 from CPG import *
 import copy
 datapath="/its/home/drs25/Documents/GitHub/Quadruped/"
+datapath="/its/home/drs25/Quadruped/"
 #datapath="C:/Users/dexte/Documents/GitHub/Quadruped/"
 np.set_printoptions(suppress=True, precision=4)
 from GA import *

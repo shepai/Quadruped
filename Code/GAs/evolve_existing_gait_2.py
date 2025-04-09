@@ -5,7 +5,7 @@ import cv2
 import sys
 sys.path.insert(1, '/its/home/drs25/Documents/GitHub/Quadruped/Code')
 sys.path.insert(1, 'C:/Users/dexte/Documents/GitHub/Quadruped/Code')
-sys.path.insert(1, 'C:/Users/dexte/Quadruped/Code')
+sys.path.insert(1, '/its/home/drs25/Quadruped/Code')
 from PIL import Image
 from environment import *
 from CPG import *
