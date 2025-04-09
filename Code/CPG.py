@@ -155,8 +155,9 @@ class CTRNNQuadruped:
         #IMU Feedback Gains (Proportional control for stability)
         self.Kp_imu = 0.5  # Adjusts hip based on tilt
         self.Kp_vel = 0.3  # Adjusts knee based on forward velocity
-
+        self.height=1
     def sigmoid(self, x):
+        x = np.clip(x, -500, 500)
         return 1 / (1 + np.exp(-x))
     def get_positions(self,inputs,motors=None):
         degrees=np.degrees(self.step(imu_feedback=0, velocity_feedback=0))/1.5
@@ -168,7 +169,9 @@ class CTRNNQuadruped:
         """Update the CTRNN for one timestep."""
         #compute neural activations (discrete update of CTRNN)
         net_input = self.weights @ self.outputs + self.biases
+        net_input = np.clip(net_input, -500, 500)
         self.activations += self.dt / self.tau * (-self.activations + net_input)
+        self.activations = np.nan_to_num(self.activations, nan=0.0, posinf=1.0, neginf=-1.0)
         self.outputs = self.sigmoid(self.activations)  #apply activation function
         #add oscillatory gait modulation
         self.phases += self.dt * self.omega
@@ -181,7 +184,7 @@ class CTRNNQuadruped:
         #apply velocity feedback for adaptive stride length (modify knees)
         velocity_correction = self.Kp_vel * velocity_feedback
         motor_commands[1::3] += velocity_correction  # Adjust knee motors
-        return np.clip(motor_commands, 0, 1)  # Return motor positions (normalized)
+        return np.clip(motor_commands, 0, 1)*self.height  # Return motor positions (normalized)
     def set_genotype(self, values):
         """Set CTRNN parameters from an evolutionary genotype."""
         num_weights = len(self.weights.flatten())
@@ -198,7 +201,7 @@ class CTRNNQuadruped:
         self.tau = np.maximum(self.tau, self.dt)  # Ensure time constants are above dt
         self.weights = np.clip(self.weights, -4, 4)  # Cap weight values
         self.omega = np.clip(self.omega, -1, 1)  # Cap weight values
-
+        self.geno=np.concatenate([self.weights.flatten(),self.biases.flatten(),self.tau.flatten(),self.omega.flatten()])
     def mutate(self,rate=0.2):
         probailities=np.random.random(self.geno.shape)
         self.geno[np.where(probailities<rate)]+=np.random.normal(0,4,self.geno[np.where(probailities<rate)].shape)
