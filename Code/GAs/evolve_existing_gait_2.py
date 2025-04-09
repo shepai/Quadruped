@@ -5,12 +5,14 @@ import cv2
 import sys
 sys.path.insert(1, '/its/home/drs25/Documents/GitHub/Quadruped/Code')
 sys.path.insert(1, 'C:/Users/dexte/Documents/GitHub/Quadruped/Code')
+sys.path.insert(1, 'C:/Users/dexte/Quadruped/Code')
 from PIL import Image
 from environment import *
 from CPG import *
 from CPG import *
 import copy
 datapath="/its/home/drs25/Documents/GitHub/Quadruped/"
+datapath="/its/home/drs25/Quadruped/"
 #datapath="C:/Users/dexte/Documents/GitHub/Quadruped/"
 np.set_printoptions(suppress=True, precision=4)
 from GA import *
@@ -42,13 +44,7 @@ class newGait(CTRNNQuadruped):
         if random.random()<rate:
             self.omega+=noise[2:]
         if random.random()<rate:
-            self.dt+=noise[0]
-        if random.random()<rate:
             self.height+=noise[1]
-        if self.dt<=0:
-            self.dt=0.05
-        elif self.dt>0.2:
-            self.dt=0.2
         
 
 def RUN(sho=0,trial=0,generations=300,fit=fitness_,fric=0.5):
