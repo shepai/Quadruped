@@ -164,26 +164,28 @@ def RUN(dt=0.1,sho=0,trial=0,generations=300,fit=fitness_,fric=0.5):
 
     t_passed=time.time()-t_start
     print("********************************\n\n\n\nTIME IT TOOK:",t_passed/(60*60),"Hours")
-DT=0.1
-for _ in range(20):
-    os.system('cls' if os.name == 'nt' else 'clear')
-    print("PROGRESS:",_,"/ 20")
-    RUN(dt=DT,sho=0,trial="_6_neurons_"+str(_)+"_F1",fit=F1)
-    RUN(dt=DT,sho=0,trial="_6_neurons_"+str(_)+"_F2",fit=F2)
-    RUN(dt=DT,sho=0,trial="_6_neurons_"+str(_)+"_F3",fit=F3)
 
-"""for trial in range(3,4):
-    for i in np.arange(0.05,1.5,0.05):
-        RUN(dt=i,sho=0,trial=trial)"""
-"""c=0
-for i in range(0,40):
-   for j in np.arange(0,1,0.05):
-    os.system('cls' if os.name == 'nt' else 'clear')
-    calc=len(range(0,40))*len( np.arange(0,1,0.05))
-    print(i,j,c/calc *100,"%")
-    RUN(dt=0.1,sho=0,trial="6_neurons_"+str(i)+"_friction",fit=F1,fric=j)
-    c+=1"""
+if __name__=="__main__":
+    DT=0.1
+    for _ in range(20):
+        os.system('cls' if os.name == 'nt' else 'clear')
+        print("PROGRESS:",_,"/ 20")
+        RUN(dt=DT,sho=0,trial="_6_neurons_"+str(_)+"_F1",fit=F1)
+        RUN(dt=DT,sho=0,trial="_6_neurons_"+str(_)+"_F2",fit=F2)
+        RUN(dt=DT,sho=0,trial="_6_neurons_"+str(_)+"_F3",fit=F3)
+
+    """for trial in range(3,4):
+        for i in np.arange(0.05,1.5,0.05):
+            RUN(dt=i,sho=0,trial=trial)"""
+    """c=0
+    for i in range(0,40):
+    for j in np.arange(0,1,0.05):
+        os.system('cls' if os.name == 'nt' else 'clear')
+        calc=len(range(0,40))*len( np.arange(0,1,0.05))
+        print(i,j,c/calc *100,"%")
+        RUN(dt=0.1,sho=0,trial="6_neurons_"+str(i)+"_friction",fit=F3,fric=j)
+        c+=1"""
 
 
-"""for i in range(0,20):
-    RUN(dt=0.1,sho=0,trial="6_neurons_"+str(i)+"_rocky",fit=F2,fric=j)"""
+    """for i in range(0,20):
+        RUN(dt=0.1,sho=0,trial="6_neurons_"+str(i)+"_rocky",fit=F3,fric=j)"""
