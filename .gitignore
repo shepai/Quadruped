@@ -3,3 +3,4 @@
 *.0
 /Code/data_collect_proj/trials
 /Code/data_collect_proj/trials_all
+Code/data_collect_proj/dataset_jumbled.npy
