@@ -1,8 +1,9 @@
 if __name__=="__main__":
     import sys
     sys.path.insert(1, '/its/home/drs25/Documents/GitHub/Quadruped/Code')#
+    sys.path.insert(1, '/its/home/drs25/Quadruped/Code')#
     sys.path.insert(1, 'C:/Users/dexte/Documents/GitHub/Quadruped/Code')
-datapath="/its/home/drs25/Documents/GitHub/Quadruped/"
+datapath="/its/home/drs25/Quadruped/"
 #datapath="C:/Users/dexte/Documents/GitHub/Quadruped/"
 from environment import *
 from CPG import *
@@ -120,7 +121,7 @@ def RUN(dt=0.1,sho=0,trial=0,generations=300,fit=fitness_,fric=0.5):
     #initial
     population_size=50
     #g=geno_gen(6,population_size)
-    population=[CTRNNQuadruped(dt=dt) for _ in range(population_size)]#np.random.choice([50, 20, 0,0,0,0,-20],(150,15,12)) #12 motors, 15 steps
+    population=[CTRNNQuadruped(dt=dt,imu=0) for _ in range(population_size)]#np.random.choice([50, 20, 0,0,0,0,-20],(150,15,12)) #12 motors, 15 steps
         
     fitnesses=np.zeros((population_size,))
     
@@ -167,24 +168,24 @@ def RUN(dt=0.1,sho=0,trial=0,generations=300,fit=fitness_,fric=0.5):
 
 if __name__=="__main__":
     DT=0.1
-    for _ in range(20):
+    """for _ in range(20):
         os.system('cls' if os.name == 'nt' else 'clear')
         print("PROGRESS:",_,"/ 20")
         RUN(dt=DT,sho=0,trial="_6_neurons_"+str(_)+"_F1",fit=F1)
         RUN(dt=DT,sho=0,trial="_6_neurons_"+str(_)+"_F2",fit=F2)
-        RUN(dt=DT,sho=0,trial="_6_neurons_"+str(_)+"_F3",fit=F3)
+        RUN(dt=DT,sho=0,trial="_6_neurons_"+str(_)+"_F3",fit=F3)"""
 
     """for trial in range(3,4):
         for i in np.arange(0.05,1.5,0.05):
             RUN(dt=i,sho=0,trial=trial)"""
-    """c=0
+    c=0
     for i in range(0,40):
-    for j in np.arange(0,1,0.05):
-        os.system('cls' if os.name == 'nt' else 'clear')
-        calc=len(range(0,40))*len( np.arange(0,1,0.05))
-        print(i,j,c/calc *100,"%")
-        RUN(dt=0.1,sho=0,trial="6_neurons_"+str(i)+"_friction",fit=F3,fric=j)
-        c+=1"""
+        for j in np.arange(0,1,0.05):
+            os.system('cls' if os.name == 'nt' else 'clear')
+            calc=len(range(0,40))*len( np.arange(0,1,0.05))
+            print(i,j,c/calc *100,"%")
+            RUN(dt=0.1,sho=0,trial="6_neurons_"+str(i)+"_friction",fit=F3,fric=j)
+            c+=1
 
 
     """for i in range(0,20):

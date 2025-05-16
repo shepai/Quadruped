@@ -136,7 +136,7 @@ class environment:
     def step(self,agent,action,delay=False,gen=0):
         if self.show and self.UI:
             agent.dt=p.readUserDebugParameter(self.x_slider)
-        motor_positions=agent.get_positions(np.array(self.quad.motors))
+        motor_positions=agent.get_positions(np.array(self.quad.getOrientation()))
         self.quad.setPositions(motor_positions)
         for k in range(10): #update simulation
             p.stepSimulation()
