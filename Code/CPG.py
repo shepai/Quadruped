@@ -134,7 +134,7 @@ class Body(CPG):
         self.set_genotype(self.geno)
         self.legs=[deepcopy(self.cpg) for i in range(self.num_legs)]
 class CTRNNQuadruped:
-    def __init__(self, num_legs=4, num_motors_per_leg=3, dt=0.1):
+    def __init__(self, num_legs=4, num_motors_per_leg=3, dt=0.1,imu=False):
         self.num_legs = num_legs
         self.num_motors = num_legs * num_motors_per_leg  # 12 motors total
         self.dt = dt  # Time step for integration
@@ -156,34 +156,41 @@ class CTRNNQuadruped:
         self.Kp_imu = 0.5  # Adjusts hip based on tilt
         self.Kp_vel = 0.3  # Adjusts knee based on forward velocity
         self.height=1
+        self.imu=imu
     def sigmoid(self, x):
         x = np.clip(x, -500, 500)
         return 1 / (1 + np.exp(-x))
     def get_positions(self,inputs,motors=None):
-        degrees=np.degrees(self.step(imu_feedback=0, velocity_feedback=0))/1.5
+        degrees=np.degrees(self.step(imu_feedback=inputs, velocity_feedback=0))/1.5
         degrees=np.clip(degrees,0,180)
         degrees[[2,5,8,11]]=degrees[[1,4,7,10]]
         degrees[3:9]=-degrees[3:9] #try running this 
         return degrees
     def step(self, imu_feedback, velocity_feedback):
         """Update the CTRNN for one timestep."""
-        #compute neural activations (discrete update of CTRNN)
-        net_input = self.weights @ self.outputs + self.biases
+        imu_feedback = np.array(imu_feedback).flatten()
+        # Create fixed input weights if not already done (move this to __init__ ideally)
+        input_weights = np.random.uniform(-1, 1, (self.num_neurons, 3)) if self.imu else np.zeros((self.num_neurons, 3))
+
+        # Convert imu_feedback to a numpy array if it's not already
+        imu_feedback = np.array(imu_feedback)
+
+        # Project IMU feedback into neuron space
+        sensory_drive = input_weights @ imu_feedback  # shape: (num_neurons,)
+
+        # Compute neural activations (discrete update of CTRNN)
+        net_input = self.weights @ self.outputs + self.biases + sensory_drive
         net_input = np.clip(net_input, -500, 500)
         self.activations += self.dt / self.tau * (-self.activations + net_input)
         self.activations = np.nan_to_num(self.activations, nan=0.0, posinf=1.0, neginf=-1.0)
-        self.outputs = self.sigmoid(self.activations)  #apply activation function
-        #add oscillatory gait modulation
+        self.outputs = self.sigmoid(self.activations)
+
+        # Add oscillatory gait modulation
         self.phases += self.dt * self.omega
         oscillation = np.sin(self.phases)
-        #compute motor commands (combining CTRNN output and oscillations)
-        motor_commands = np.concatenate([self.outputs[0:3],self.outputs[0:3],self.outputs[0:3],self.outputs[0:3]]) + 0.5 * oscillation
-        #apply IMU feedback for balance correction (modify hip joints)
-        imu_correction = self.Kp_imu * imu_feedback  # Pitch correction
-        motor_commands[::3] += imu_correction  # Adjust hips
-        #apply velocity feedback for adaptive stride length (modify knees)
-        velocity_correction = self.Kp_vel * velocity_feedback
-        motor_commands[1::3] += velocity_correction  # Adjust knee motors
+
+        # Compute motor commands (combine CTRNn output and oscillation)
+        motor_commands = np.concatenate([self.outputs[0:3]] * 4) + 0.5 * oscillation
         return np.clip(motor_commands, 0, 1)*self.height  # Return motor positions (normalized)
     def set_genotype(self, values):
         """Set CTRNN parameters from an evolutionary genotype."""
@@ -206,7 +213,11 @@ class CTRNNQuadruped:
         probailities=np.random.random(self.geno.shape)
         self.geno[np.where(probailities<rate)]+=np.random.normal(0,4,self.geno[np.where(probailities<rate)].shape)
         self.set_genotype(self.geno)
-
+    def sex(self,geno1,geno2,prob_winning=0.6):
+        probabilities=np.random.random(self.gene_size)
+        geno2.geno[np.where(probabilities<prob_winning)]=geno1.geno[np.where(probabilities<prob_winning)]
+        geno2.set_genotype(geno2)
+        return geno2
 class Pattern:
     def __init__(self,a,h,b,k):
         self.geno=torch.tensor([a,h,b,k])
@@ -453,8 +464,8 @@ if __name__ == "__main__":
     plt.show()"""
 
     b=Body(10,10)  
-    ctrnn = CTRNNQuadruped()
-    imu_feedback = 0.1  # Example tilt correction
+    ctrnn = CTRNNQuadruped(imu=1)
+    imu_feedback = [0.1,0.3,0.4]  # Example tilt correction
     velocity_feedback = 0.2  # Example velocity correction
 
     for t in range(100):  # Simulate for 100 steps
