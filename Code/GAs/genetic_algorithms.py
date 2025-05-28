@@ -102,3 +102,19 @@ class Differential(GA):
             self.best_genos_time.append(deepcopy(self.pop[np.argmax(fitness_matrix)]))
             history.append(np.max(fitness_matrix))
         return np.array(history), fitness_matrix
+
+class NSGA_II(GA):
+    def evolve(self,environment,fitness,timesteps,outputs=False,rate=0.2):
+        history=[0]
+        fitness_matrix=np.zeros((self.pop_zise))
+        for i in range(self.pop_zise): #calculate current fitness of all genotypes
+            fitness__,history_,_=environment.runTrial(self.pop[i],timesteps,fitness=fitness)
+            fitness_matrix[i]=fitness__
+        for gen in range(self.generations):
+            #make offspring popoulation from P_t using selection crossover and mutation 
+            #combine populations
+            #perform non dominated sorrting on the combined population
+            # create new population
+            #assign crowding distance to individuals 
+            #sort by crowding distance
+            pass

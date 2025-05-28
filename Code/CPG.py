@@ -214,9 +214,9 @@ class CTRNNQuadruped:
         self.geno[np.where(probailities<rate)]+=np.random.normal(0,4,self.geno[np.where(probailities<rate)].shape)
         self.set_genotype(self.geno)
     def sex(self,geno1,geno2,prob_winning=0.6):
-        probabilities=np.random.random(self.gene_size)
+        probabilities=np.random.random(len(self.geno))
         geno2.geno[np.where(probabilities<prob_winning)]=geno1.geno[np.where(probabilities<prob_winning)]
-        geno2.set_genotype(geno2)
+        geno2.set_genotype(geno2.geno)
         return geno2
 class Pattern:
     def __init__(self,a,h,b,k):

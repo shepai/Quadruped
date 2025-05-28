@@ -17,11 +17,11 @@ from genetic_algorithms import *
 def RUN_diff(dt=0.1,sho=0,trial=0,generations=300,fit=fitness_,fric=0.5):
     env=environment(sho,friction=fric)
     env.dt=dt
-    population_size=5
+    population_size=50
     mutation_rate=0.2
     ga=Differential(population_size, generations, mutation_rate,0.2)
     ga.initialize_population(CTRNNQuadruped, [4,3,0.1,0])
-    ga.evolve(env, fit, 20)
+    ga.evolve(env, fit, 20,outputs=1)
     t_start=time.time()
     #get fitnesses
     with open(datapath+'/models/genotypes_dt'+str(dt)+"_"+str(trial)+str(fric)+'.pkl', 'wb') as f:
@@ -44,7 +44,7 @@ def RUN_microbial(dt=0.1,sho=0,trial=0,generations=300,fit=fitness_,fric=0.5):
     mutation_rate=0.2
     ga=Microbial_GA(population_size, generations, 0.2)
     ga.initialize_population(CTRNNQuadruped, [4,3,0.1,0])
-    ga.evolve(env, fit, 20)
+    ga.evolve(env, fit, 20,outputs=1)
     t_start=time.time()
     #get fitnesses
     with open(datapath+'/models/genotypes_dt'+str(dt)+"_"+str(trial)+str(fric)+'.pkl', 'wb') as f:
@@ -66,7 +66,7 @@ def RUN_hillclimber(dt=0.1,sho=0,trial=0,generations=300,fit=fitness_,fric=0.5):
     mutation_rate=0.2
     ga=Hillclimbers(population_size, generations, 0.2)
     ga.initialize_population(CTRNNQuadruped, [4,3,0.1,0])
-    ga.evolve(env, fit, 20)
+    ga.evolve(env, fit, 20,outputs=1)
     t_start=time.time()
     #get fitnesses
     with open(datapath+'/models/genotypes_dt'+str(dt)+"_"+str(trial)+str(fric)+'.pkl', 'wb') as f:
