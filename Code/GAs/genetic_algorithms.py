@@ -23,7 +23,7 @@ class GA:
         self.pop=population
 
 class Hillclimbers(GA):
-    def evolve(self,environment,fitness,outputs=False):
+    def evolve(self,environment,fitness,timesteps,outputs=False):
         fitness_matrix=np.zeros((self.pop_zise))
         history=[]
         for i in range(self.pop_zise): #calculate current fitness of all genotypes
