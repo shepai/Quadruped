@@ -143,7 +143,7 @@ class sinBot:
         self.hip_geno=np.random.uniform(-1,1,(3))
         self.leg_geno=np.random.uniform(-1,1,(3))
         self.phase=np.random.uniform(-1,1,(4))
-        self.geno=mp.concatenate([hip_geno,leg_geno,phase])
+        self.geno=np.concatenate([self.hip_geno,self.leg_geno,self.phase])
         self.t=0
     def get_positions(self,inputs,motors=None):
         degrees=np.degrees(self.step(imu_feedback=inputs, velocity_feedback=0))/1.5
@@ -158,7 +158,7 @@ class sinBot:
             L=self.leg_geno[0]*np.sin(self.leg_geno[1]*self.t - self.phase[i]) + self.leg_geno[2]
             motor_positions.append([H,L,0])
         self.t+=self.dt
-        return motor_positions
+        return np.array(motor_positions).flatten()
     def mutate(self,rate=0.2):
         probailities=np.random.random(self.geno.shape)
         self.geno[np.where(probailities<rate)]+=np.random.normal(0,4,self.geno[np.where(probailities<rate)].shape)
