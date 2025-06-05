@@ -180,6 +180,7 @@ class GYM(gym.Env):
             self.x_slider = p.addUserDebugParameter("dt", -5, 5, 0.1)
         self.action_space = spaces.Box(low= -0.1, high = 1, shape = (12,),dtype=np.float32)
         self.observation_space=spaces.Box(low=-2.0, high=2.0, shape=(1,), dtype=np.float32)#spaces.Discrete(9)
+        self.fitness_over_time=[]
     def take_agent_snapshot(self,p, agent_id, alpha=0.1, width=640, height=480):
         # Make all objects except the agent transparent
         num_bodies = p.getNumBodies()
@@ -220,6 +221,10 @@ class GYM(gym.Env):
             self.recording=1
         #if self.show:
             #self.x_slider = p.addUserDebugParameter("dt", -2, 2, 0.1)
+        try:
+            self.fitness_over_time.append(self.history['accumalitive_reward'][-1]) #collect over time
+        except:
+            pass
         self.history={}
         self.history['positions']=[]
         self.history['orientations']=[]
@@ -235,7 +240,7 @@ class GYM(gym.Env):
         self.agent=agent
     def step(self,action,delay=False,gen=0):
         self.agent.set_genotype(action)
-        motor_positions=self.agent.step(np.array(self.quad.getOrientation()))
+        motor_positions=self.agent.step(np.array(self.quad.getOrientation()))*40
         self.quad.setPositions(motor_positions)
         for k in range(10): #update simulation
             p.stepSimulation()

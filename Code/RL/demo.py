@@ -17,6 +17,7 @@ import torch
 import torch.nn as nn
 from stable_baselines3.common.torch_layers import BaseFeaturesExtractor
 from stable_baselines3.common.policies import ActorCriticPolicy
+import numpy as np
 
 def F3(done,history={}): 
     fitness=0
@@ -68,4 +69,23 @@ from stable_baselines3.ppo import PPO
 check_env(env)
 
 model = PPO(CustomMLPPolicy, env, verbose=1)
-model.learn(total_timesteps=100_000)
+model.learn(total_timesteps=10000)
+
+obs,_ = env.reset()
+for step in range(200):  # Run for 200 steps
+    action, _states = model.predict(obs, deterministic=True)
+    obs, reward, done, _, info = env.step(action)
+    if done:
+        break
+
+
+ar=np.array(env.history['positions'])
+np.save(datapath+"models/RL/testpath",ar)
+
+np.save(datapath+"models/RL/history",np.array(env.fitness_over_time))
+
+import matplotlib
+import matplotlib.pyplot as plt
+matplotlib.use('TkAgg') 
+plt.plot(ar[:,0],ar[:,1])
+plt.show()

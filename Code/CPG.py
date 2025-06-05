@@ -151,7 +151,7 @@ class sinBot:
         degrees[[2,5,8,11]]=degrees[[1,4,7,10]]
         degrees[3:9]=-degrees[3:9] #try running this 
         return degrees
-    def step(self, imu_feedback, velocity_feedback):
+    def step(self, imu_feedback, velocity_feedback=0):
         motor_positions=[]
         for i in range(self.num_legs):
             H=self.hip_geno[0]*np.sin(self.hip_geno[1]*self.t - self.phase[i]) + self.hip_geno[2]
