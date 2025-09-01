@@ -48,6 +48,7 @@ class environment:
             self.x_slider = p.addUserDebugParameter("dt", -5, 5, 0.1)
         self.INCREASE=0
         self.BALANCE=0
+        self.STRIDE=1
     def take_agent_snapshot(self,p, agent_id, alpha=0.1, width=640, height=480):
         # Make all objects except the agent transparent
         num_bodies = p.getNumBodies()
@@ -143,6 +144,7 @@ class environment:
         #print(motor_positions[[2,5,8,11]])
         motor_positions[[2,11]]+=self.BALANCE#*(motor_positions[[2,5,8,11]]/np.abs(motor_positions[[2,5,8,11]]))
         motor_positions[[8,5]]-=self.BALANCE
+        motor_positions[[0,3,6,9]]*=self.STRIDE
         #print("=",motor_positions[[2,5,8,11]])
         #print(motor_positions)
         self.quad.setPositions(motor_positions)

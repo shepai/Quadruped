@@ -41,15 +41,24 @@ best=0
 index=0
 
 index=np.argmax(fitnesses)
-env=environment(True,1,datapath+"/assets/videos/example_dt0.2_already_evolved_10.0.mp4")
+env=environment(True,1,datapath+"/assets/videos/lowspeed.mp4",UI=0)
+#low
 env.INCREASE=-30
 env.BALANCE=30
-population[index].dt=0.1
-fit,mot,photos=env.runTrial(population[index],50,delay=0,fitness=fitness_,photos=10)
+#high
+env.INCREASE=10
+env.BALANCE=-10
+#normal
+env.INCREASE=0
+env.BALANCE=0
+env.STRIDE=1
+
+population[index].dt=0.01
+fit,history,photos=env.runTrial(population[index],50,delay=0,fitness=fitness_,photos=10)
 env.stop()
 
-np.savez(datapath+"/Code/GAs/motors_dt0.2_already_evolved_10.0",mot,allow_pickle=True)
+np.savez(datapath+"/Code/GAs/lowspeed",history,allow_pickle=True)
 
 if len(photos)>1:
     print("saving photos")
-    np.save(datapath+"/assets/frames",np.array(photos))
+    np.save(datapath+"/assets/lowspeed",np.array(photos))
