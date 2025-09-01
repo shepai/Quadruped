@@ -1,9 +1,12 @@
 if __name__=="__main__":
     import sys
     sys.path.insert(1, '/its/home/drs25/Documents/GitHub/Quadruped/Code')
+    sys.path.insert(1, '/its/home/drs25/Quadruped/Code')
     sys.path.insert(1, 'C:/Users/dexte/Documents/GitHub/Quadruped/Code')
 datapath="/its/home/drs25/Documents/GitHub/Quadruped/"
 datapath="C:/Users/dexte/Documents/GitHub/Quadruped/"
+datapath="/its/home/drs25/Quadruped/"
+
 from environment import *
 from CPG import *
 import pickle
