@@ -10,9 +10,9 @@ datapath="/its/home/drs25/Quadruped/"
 from environment import *
 from CPG import *
 import pickle
-with open(datapath+'/models/genotypes_dt0.1_6_neurons_0.pkl', 'rb') as f:
+with open(datapath+'/models/6_neurons/genotypes_dt0.1__6_neurons_0_F10.5.pkl', 'rb') as f:
     population = pickle.load(f)
-fitnesses=np.load(datapath+"/models/fitnesses_dt0.1_6_neurons_0.npy")
+fitnesses=np.load(datapath+"/models/6_neurons/fitnesses_dt0.1__6_neurons_0_F10.5.npy")
 def fitness_(robot,history={}): 
     fitness=0
     #look at behaviour over time
@@ -41,11 +41,11 @@ best=0
 index=0
 
 index=np.argmax(fitnesses)
-env=environment(True,1,datapath+"/assets/videos/example_dt0.2_6_neurons_0.mp4")
-population[index].dt=1
+env=environment(True,1,datapath+"/assets/videos/example_dt0.2_already_evolved_10.0.mp4")
+population[index].dt=0.1
 fit,mot,photos=env.runTrial(population[index],50,delay=0,fitness=fitness_,photos=10)
 env.stop()
-np.savez(datapath+"/Code/GAs/motors_dt0.2_6_neurons_0",mot,allow_pickle=True)
+np.savez(datapath+"/Code/GAs/motors_dt0.2_already_evolved_10.0",mot,allow_pickle=True)
 
 if len(photos)>1:
     print("saving photos")
