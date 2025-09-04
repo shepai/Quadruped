@@ -66,7 +66,7 @@ class environment:
     def reset(self):
         p.resetSimulation()
         p.setGravity(0, 0, -9.81)
-        self.plane_id = p.loadURDF(self.plane_file,[-1, -1, -0.1], useFixedBase=True)
+        self.plane_id = p.loadURDF(self.plane_file,[-1, -1, -1], useFixedBase=True)
         p.configureDebugVisualizer(p.COV_ENABLE_GUI, 1)  # Ensure GUI is enabled
         p.configureDebugVisualizer(p.COV_ENABLE_SEGMENTATION_MARK_PREVIEW, 0)  # Hide Explorer
         p.configureDebugVisualizer(p.COV_ENABLE_RGB_BUFFER_PREVIEW, 0)  # Hide RGB view
@@ -74,7 +74,7 @@ class environment:
         p.changeDynamics(self.plane_id, -1, lateralFriction=self.friction)
         p.setPhysicsEngineParameter(enableConeFriction=0)
         p.changeDynamics(self.plane_id, -1, lateralFriction=self.friction)
-        initial_position = [0, 0, 5.8]  # x=1, y=2, z=0.5
+        initial_position = [0, 0, 6.8]  # x=1, y=2, z=0.5
         initial_orientation = p.getQuaternionFromEuler([0, 0, 0])  # No rotation (Euler angles to quaternion)
         flags = p.URDF_USE_SELF_COLLISION
         self.robot_id = p.loadURDF(path+"Quadruped_prestip.urdf", initial_position, initial_orientation,flags=flags)
