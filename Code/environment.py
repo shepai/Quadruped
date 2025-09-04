@@ -25,7 +25,7 @@ import torch
 def demo(variable,history={}):
     return 0
 class environment:
-    def __init__(self,show=False,record=False,filename="",friction=0.5,UI=1):
+    def __init__(self,show=False,record=False,filename="",friction=0.5,UI=1,floorpath='plane.urdf'):
         self.show=show
         if show: p.connect(p.GUI)
         else: p.connect(p.DIRECT)
@@ -49,6 +49,7 @@ class environment:
         self.INCREASE=0
         self.BALANCE=0
         self.STRIDE=1
+        self.plane_file=floorpath
     def take_agent_snapshot(self,p, agent_id, alpha=0.1, width=640, height=480):
         # Make all objects except the agent transparent
         num_bodies = p.getNumBodies()
@@ -65,7 +66,7 @@ class environment:
     def reset(self):
         p.resetSimulation()
         p.setGravity(0, 0, -9.81)
-        self.plane_id = p.loadURDF('plane.urdf')
+        self.plane_id = p.loadURDF(self.plane_file)
         p.configureDebugVisualizer(p.COV_ENABLE_GUI, 1)  # Ensure GUI is enabled
         p.configureDebugVisualizer(p.COV_ENABLE_SEGMENTATION_MARK_PREVIEW, 0)  # Hide Explorer
         p.configureDebugVisualizer(p.COV_ENABLE_RGB_BUFFER_PREVIEW, 0)  # Hide RGB view
