@@ -66,7 +66,7 @@ class environment:
     def reset(self):
         p.resetSimulation()
         p.setGravity(0, 0, -9.81)
-        self.plane_id = p.loadURDF(self.plane_file,[-1, -1, -1], useFixedBase=True)
+        self.plane_id = p.loadURDF(self.plane_file,[-1, -1, -0.1], useFixedBase=True)
         p.configureDebugVisualizer(p.COV_ENABLE_GUI, 1)  # Ensure GUI is enabled
         p.configureDebugVisualizer(p.COV_ENABLE_SEGMENTATION_MARK_PREVIEW, 0)  # Hide Explorer
         p.configureDebugVisualizer(p.COV_ENABLE_RGB_BUFFER_PREVIEW, 0)  # Hide RGB view
