@@ -21,6 +21,8 @@ class Quadruped:
                 controlMode=self.p.POSITION_CONTROL,
                 targetPosition=maths.radians(self.neutral[joint_index])
             )
+    def getPositions(self):
+        return np.array(self.motors)+(np.array(self.offset)-90)
     def setPositions(self,positions): #positions in degrees
         for i in range(len(positions)):
            self.motors[i]=positions[i]-(self.offset[i]-90)
