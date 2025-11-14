@@ -67,7 +67,7 @@ if __name__=="__main__":
                         os.system('cls' if os.name == 'nt' else 'clear')
                         calc=len(range(0,40))*len( np.arange(0,1,0.05))
                         print(i,j,c/calc *100,"%")
-                        RUN_hillclimber(dt=0.1,sho=0,trial="hill_climber_"+str(i)+"_friction",fit=F3,fric=j,encoding=[stide,body,speed])
+                        RUN_hillclimber(dt=0.1,sho=0,trial="hill_climber_"+str(i)+"_friction",fit=F3,fric=j,encoding=[stride,body,speed])
                         c+=1
                         progress=[stride,body,speed,i,j]
                         file=open("/its/home/drs25/Quadruped/Code/GAs/track_progress.txt","w")
