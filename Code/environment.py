@@ -50,7 +50,7 @@ class environment:
         self.BALANCE=0
         self.STRIDE=1
         self.plane_file=floorpath
-    def take_agent_snapshot(self,p, agent_id, alpha=0.1, width=640, height=480):
+    def take_agent_snapshot(self, p, agent_id, alpha=0.1, width=640, height=480):
         # Make all objects except the agent transparent
         num_bodies = p.getNumBodies()
         for i in range(num_bodies):
@@ -59,10 +59,44 @@ class environment:
                 visual_shapes = p.getVisualShapeData(body_id)
                 for visual in visual_shapes:
                     p.changeVisualShape(body_id, visual[1], rgbaColor=[1, 1, 1, alpha])  # Set transparency
-        # Capture snapshot from the current camera view
-        _, _, img_arr, _, _ = p.getCameraImage(width, height)
-        # Convert the image array to a NumPy array
+
+        # Get agent position to center camera
+        pos, _ = p.getBasePositionAndOrientation(agent_id)
+
+        # Define camera
+        cam_distance = 1.0   # smaller = closer
+        cam_yaw = 45         # rotate around target
+        cam_pitch = -30      # tilt angle
+        fov = 30             # smaller = zoomed in
+        aspect = width / height
+
+        view_matrix = p.computeViewMatrixFromYawPitchRoll(
+            cameraTargetPosition=pos,
+            distance=cam_distance,
+            yaw=cam_yaw,
+            pitch=cam_pitch,
+            roll=0,
+            upAxisIndex=2
+        )
+
+        projection_matrix = p.computeProjectionMatrixFOV(
+            fov=fov,
+            aspect=aspect,
+            nearVal=0.1,
+            farVal=100
+        )
+
+        # Capture snapshot
+        _, _, img_arr, _, _ = p.getCameraImage(
+            width,
+            height,
+            viewMatrix=view_matrix,
+            projectionMatrix=projection_matrix,
+            renderer=p.ER_BULLET_HARDWARE_OPENGL
+        )
+
         return np.array(img_arr, dtype=np.uint8)
+
     def reset(self):
         p.resetSimulation()
         p.setGravity(0, 0, -9.81)
@@ -112,6 +146,7 @@ class environment:
             pos=self.step(agent,0,delay=delay)
             if photos>-1 and i%photos==0:
                 print("snap")
+                basePos, baseOrn = p.getBasePositionAndOrientation(self.robot_id) # Get model position
                 photos_l.append(self.take_agent_snapshot(p,self.robot_id))
             #pos[[2,5,8,11]]=180-pos[[1,4,7,10]]
             basePos, baseOrn = p.getBasePositionAndOrientation(self.robot_id) # Get model position
