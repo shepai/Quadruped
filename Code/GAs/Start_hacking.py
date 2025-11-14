@@ -10,6 +10,7 @@ datapath="/its/home/drs25/Documents/GitHub/Quadruped/"
 from environment import *
 from CPG import CTRNNQuadruped
 import pickle
+from copy import deepcopy
 from GA_gaitchange import RUN_hillclimber, F3
 with open(datapath+'/models/6_neurons/genotypes_dt0.1__6_neurons_0_F10.5.pkl', 'rb') as f:
     population = pickle.load(f)
@@ -56,26 +57,33 @@ env.STRIDE=1
 #population[index].dt=0.01
 for fric in np.arange(0,1,0.05):
     #firstly generate the perfect gait
+    print("PRGRESS",fric,stride,body,speed)
+    best_geno=RUN_hillclimber(dt=0.1,sho=0,trial="frictions_and_stuff/hillclimber_"+str(i)+"_friction",fit=F3,fric=fric,encoding=[stride,body,speed])
     for stride in range(3):
             for body in range(3):
                 for speed in range(3):
-                    RUN_hillclimber(dt=0.1,sho=0,trial="frictions_and_stuff/hill_climber_"+str(i)+"_friction",fit=F3,fric=fric,encoding=[stride,body,speed])
-                    if encoding[0]==0:#low
+                    copy=deepcopy(best_geno)
+                    env=environment(0,300,friction=fric)
+                    if stride==0:#low
                         env.STRIDE=0.5
-                    elif encoding[0]==1:#high
+                    elif stride==1:#high
                         env.STRIDE=2
                     else:#normal
                         env.STRIDE=1
-                    if encoding[1]==0:#low
+                    if body==0:#low
                         env.BALANCE=30
                         env.INCREASE=-30
-                    elif encoding[1]==1:#high
+                    elif body==1:#high
                         env.BALANCE=-10
                         env.INCREASE=0
                     else:#normal
                         env.BALANCE=0
+                    if speed==0:
+                        copy.tau*=0.001
+                    elif speed==1:
+                        copy.tau*=10000
                     #then see how the changes impact
-                    fit,history,photos=env.runTrial(population[index],50,delay=0,fitness=fitness_,photos=-1)
+                    fit,history,photos=env.runTrial(copy,50,delay=0,fitness=fitness_,photos=-1)
                     env.stop()
 
                     np.savez(datapath+"/models/frictions_and_stuff/"+str(fric)+"_"+str(stride)+"_"+str(body)+"_"+str(speed),history,allow_pickle=True)

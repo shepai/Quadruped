@@ -46,10 +46,10 @@ def RUN_hillclimber(dt=0.1,sho=0,trial=0,generations=300,fit=fitness_,fric=0.5,e
     t_start=time.time()
     #get fitnesses
     name=str(encoding[0])+"-"+str(encoding[1])+"-"+str(encoding[2])
-    with open(datapath+'/models/frictionGaitSelect/genotypes_dt'+str(dt)+"_"+str(trial)+str(fric)+"_"+name+'.pkl', 'wb') as f:
+    with open(datapath+'genotypes_dt'+str(dt)+"_"+str(trial)+str(fric)+"_"+name+'.pkl', 'wb') as f:
         pickle.dump(ga.pop, f)
-    np.save(datapath+'/models/frictionGaitSelect/fitnesses_dt'+str(dt)+"_"+str(trial)+str(fric)+"_"+name,fitnesses)
-    np.save(datapath+'/models/frictionGaitSelect/history_dt'+str(dt)+"_"+str(trial)+str(fric)+"_"+name,history)
+    np.save(datapath+'fitnesses_dt'+str(dt)+"_"+str(trial)+str(fric)+"_"+name,fitnesses)
+    np.save(datapath+'history_dt'+str(dt)+"_"+str(trial)+str(fric)+"_"+name,history)
 
     env.runTrial(ga.pop[np.where(fitnesses==np.max(fitnesses))[0][0]],150,fitness=fit)
     print("top fitness:",np.max(fitnesses))
@@ -57,6 +57,7 @@ def RUN_hillclimber(dt=0.1,sho=0,trial=0,generations=300,fit=fitness_,fric=0.5,e
 
     t_passed=time.time()-t_start
     print("********************************\n\n\n\nTIME IT TOOK:",t_passed/(60*60),"Hours")
+    return ga.pop[np.argmax(fitnesses)] #return best
 if __name__=="__main__":
     c=0
     for stride in range(3):
@@ -67,7 +68,7 @@ if __name__=="__main__":
                         os.system('cls' if os.name == 'nt' else 'clear')
                         calc=len(range(0,40))*len( np.arange(0,1,0.05))
                         print(i,j,c/calc *100,"%")
-                        RUN_hillclimber(dt=0.1,sho=0,trial="hill_climber_"+str(i)+"_friction",fit=F3,fric=j,encoding=[stride,body,speed])
+                        RUN_hillclimber(dt=0.1,sho=0,trial="/models/frictionGaitSelect/hill_climber_"+str(i)+"_friction",fit=F3,fric=j,encoding=[stride,body,speed])
                         c+=1
                         progress=[stride,body,speed,i,j]
                         file=open("/its/home/drs25/Quadruped/Code/GAs/track_progress.txt","w")
