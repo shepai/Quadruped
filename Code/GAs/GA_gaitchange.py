@@ -15,7 +15,7 @@ from fitnesses import *
 from genetic_algorithms import *
 
 
-def RUN_hillclimber(dt=0.1,sho=0,trial=0,generations=300,fit=fitness_,fric=0.5,encoding=[0,0,0]):
+def RUN_hillclimber(dt=0.1,sho=0,trial=0,generations=300,fit=fitness_,fric=0.5,encoding=[0,0,0],dir_=""):
     env=environment(sho,generations,friction=fric)
     if encoding[0]==-1:#low
         env.STRIDE=0.5
@@ -46,10 +46,10 @@ def RUN_hillclimber(dt=0.1,sho=0,trial=0,generations=300,fit=fitness_,fric=0.5,e
     t_start=time.time()
     #get fitnesses
     name=str(encoding[0])+"-"+str(encoding[1])+"-"+str(encoding[2])
-    with open(datapath+'genotypes_dt'+str(dt)+"_"+str(trial)+str(fric)+"_"+name+'.pkl', 'wb') as f:
+    with open(datapath+dir_+'genotypes_dt'+str(dt)+"_"+str(trial)+str(fric)+"_"+name+'.pkl', 'wb') as f:
         pickle.dump(ga.pop, f)
-    np.save(datapath+'fitnesses_dt'+str(dt)+"_"+str(trial)+str(fric)+"_"+name,fitnesses)
-    np.save(datapath+'history_dt'+str(dt)+"_"+str(trial)+str(fric)+"_"+name,history)
+    np.save(datapath+dir_+'fitnesses_dt'+str(dt)+"_"+str(trial)+str(fric)+"_"+name,fitnesses)
+    np.save(datapath+dir_+'history_dt'+str(dt)+"_"+str(trial)+str(fric)+"_"+name,history)
 
     env.runTrial(ga.pop[np.where(fitnesses==np.max(fitnesses))[0][0]],150,fitness=fit)
     print("top fitness:",np.max(fitnesses))
