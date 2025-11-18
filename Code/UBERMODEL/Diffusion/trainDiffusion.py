@@ -23,8 +23,8 @@ if __name__=="__main__":
     #train the model
     model.fit(
         X, y,
-        epochs=600,
-        batch_size=8,
+        epochs=100,
+        batch_size=32,
         validation_split=0.1
     )
-    model.save("/its/home/drs25/Quadruped/Code/UBERMODEL/gait_model.h5")
+    model.save("/its/home/drs25/Quadruped/Code/UBERMODEL/gait_model.keras")
