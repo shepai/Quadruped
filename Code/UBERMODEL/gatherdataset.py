@@ -59,7 +59,7 @@ for i in range(0,len(genotypes)): #len(genotypes)
                         #    pickle.dump(history, handle)
                         X_T=[]
                         y_T=[]
-                        if len(history[i]['positions'])-1 == 99:
+                        if len(history[-1]['positions'])-1 == 99:
                             for t in range(len(history[-1]['positions'])-1): #store into a single vector over time
                                 v1 = np.array(history[-1]['positions'][t])
                                 v2 = np.array(history[-1]['positions'][t+1])
