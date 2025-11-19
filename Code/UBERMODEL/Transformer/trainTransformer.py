@@ -107,26 +107,28 @@ if __name__=="__main__":
     T = 200     # timesteps
     V1 = 20      # joints
     V2 = 12      # joints
-
-    X, y = generate_noisy_sine_dataset(N, T, V1,V2, noise_std=0.2)
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    #X, y = generate_noisy_sine_dataset(N, T, V1,V2, noise_std=0.2)
+    X=torch.tensor(np.load("/its/home/drs25/Quadruped/Code/UBERMODEL/X_DATA.npy"),  dtype=torch.float32)[100:]
+    y=torch.tensor(np.load("/its/home/drs25/Quadruped/Code/UBERMODEL/y_DATA.npy"),  dtype=torch.float32)[100:]
     print(X.shape,y.shape)
     dataset = MotorDataset(X, y)
     loader = DataLoader(dataset, batch_size=64, shuffle=True)
-    n_epochs = 2500
+    n_epochs = 1500
     train_losses = []
     val_losses = []
-    model = MotorTransformer(input_dim=V1,output_dim=V2,T=T)
+    model = MotorTransformer(input_dim=V1,output_dim=V2,T=T).to(device)
     opt = torch.optim.Adam(model.parameters(), lr=1e-3)
     loss_fn = nn.MSELoss()
     for epoch in range(n_epochs):
         for xb, yb in loader:
-            pred = model(xb)
-            loss = loss_fn(pred, yb)
+            pred = model(xb.to(device))
+            loss = loss_fn(pred, yb.to(device))
 
             opt.zero_grad()
             loss.backward()
             opt.step()
 
         print(f"Epoch {epoch+1} | Loss: {loss.item():.6f}")
-    torch.save(model.state_dict(), "/its/home/drs25/Quadruped/Code/UBERMODEL/models/motor_transformer.pth")
+    torch.save(model.state_dict(), "/its/home/drs25/Quadruped/Code/UBERMODEL/models/gait_transformer.pth")
     
