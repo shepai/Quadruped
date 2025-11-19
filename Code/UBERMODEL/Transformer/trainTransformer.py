@@ -65,13 +65,24 @@ class MotorTransformer(nn.Module):
             dim_feedforward=128,
             batch_first=True
         )
+        self.register_buffer("pos_encoding", self.create_sinusoidal_encoding(T, model_dim))
+
         self.encoder = nn.TransformerEncoder(layer, num_layers=num_layers)
 
         self.output = nn.Linear(model_dim, output_dim)
 
         # Optional learnable positional encoding
         self.pos = nn.Parameter(torch.randn(1, T, model_dim) * 0.01)
+    def create_sinusoidal_encoding(self, T, dim):
+        """Return (T, dim) sinusoidal positional encoding."""
+        pe = torch.zeros(T, dim)
+        position = torch.arange(0, T).float().unsqueeze(1)
+        div_term = torch.exp(torch.arange(0, dim, 2).float() * (-math.log(10000.0) / dim))
 
+        pe[:, 0::2] = torch.sin(position * div_term)   # even dimensions
+        pe[:, 1::2] = torch.cos(position * div_term)   # odd dimensions
+
+        return pe.unsqueeze(0)   # shape: (1, T, dim)
     def forward(self, x):
         x = self.input_proj(x)
         x = x + self.pos[:, :x.size(1)]

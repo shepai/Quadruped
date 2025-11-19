@@ -3,6 +3,7 @@ import tensorflow as tf
 import matplotlib.pyplot as plt 
 import matplotlib
 import numpy as np
+from trainModel import generate_noisy_sine_dataset
 matplotlib.use('TkAgg')
 
 def test_data(X):
@@ -37,9 +38,11 @@ def display_data(y, Pred, dt=0.1):
 
 if __name__=="__main__":
     #load in the data 
-    X=np.random.random((100,200,20)) #random for now
-    y=np.random.random((100,200,12))
+    #X, y = generate_noisy_sine_dataset(100, 200, 20, 12, noise_std=0.2)
+    X=np.load("/its/home/drs25/Quadruped/Code/UBERMODEL/X_DATA.npy")[0:100]
+    y=np.load("/its/home/drs25/Quadruped/Code/UBERMODEL/y_DATA.npy")[0:100]
     pred=test_data(X)
+    display_data(y, pred)
     display_data(y, pred)
 
 

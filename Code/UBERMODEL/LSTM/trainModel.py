@@ -47,7 +47,9 @@ def generate_noisy_sine_dataset(N, T, V1,V2, noise_std=0.1):
     return X, y
 if __name__=="__main__":
     #load in the data 
-    X, y = generate_noisy_sine_dataset(100, 200, 20, 12, noise_std=0.2)
+    #X, y = generate_noisy_sine_dataset(100, 200, 20, 12, noise_std=0.2)
+    X=np.load("/its/home/drs25/Quadruped/Code/UBERMODEL/X_DATA.npy")[100:]
+    y=np.load("/its/home/drs25/Quadruped/Code/UBERMODEL/y_DATA.npy")[100:]
     input_dim = X.shape[-1]
     output_dim = y.shape[-1]
     inp = layers.Input(shape=(None, input_dim))
@@ -64,7 +66,7 @@ if __name__=="__main__":
     #train the model
     model.fit(
         X, y,
-        epochs=1000,
+        epochs=1500,
         batch_size=32,
         validation_split=0.1
     )

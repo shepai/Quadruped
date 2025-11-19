@@ -4,15 +4,15 @@ import matplotlib
 import numpy as np
 matplotlib.use('TkAgg')
 import torch
-def show_example(channels,expected):
-    example = channels.detach().numpy()[0]
-    pred = expected.detach().numpy()[0]
+def show_example(channels,expected, dt=0.1):
+    example = channels.cpu().detach().numpy()[0]
+    pred = expected.cpu().detach().numpy()[0]
     timesteps = np.arange(len(example)) * dt
 
     plt.figure(figsize=(8, 5), dpi=200)  # good for A4 export
 
-    plt.plot(timesteps, example, c="r", label="Truth", linewidth=2)
-    plt.plot(timesteps, pred, "--", c="b", label="Predicted", linewidth=2)
+    plt.plot(timesteps, example, c="g", label="Truth", linewidth=2)
+    plt.plot(timesteps, pred, "--", c="m", label="Predicted", linewidth=2)
 
     plt.xlabel("Time (s)", fontsize=14)
     plt.ylabel("Value", fontsize=14)
@@ -31,8 +31,9 @@ if __name__=="__main__":
     T = 200     # timesteps
     V1 = 20      # joints
     V2 = 12      # joints
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     model = MotorTransformer(input_dim=V1,output_dim=V2,T=T).to(device)
-    model.load_state_dict(torch.load("/its/home/drs25/Quadruped/Code/UBERMODEL/models/motor_transformer.pth"))
+    model.load_state_dict(torch.load("/its/home/drs25/Quadruped/Code/UBERMODEL/models/gait_transformer.pth"))
     model.eval()
     
 
