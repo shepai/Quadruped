@@ -2,7 +2,13 @@ import torch
 import torch.nn as nn
 from torch.utils.data import TensorDataset, DataLoader
 import numpy as np 
-
+import sys
+def clear_line_up():
+    # Move cursor up one line
+    sys.stdout.write("\033[1A")
+    # Clear that line
+    sys.stdout.write("\033[2K")
+    sys.stdout.flush()
 class LSTMModel(nn.Module):
     def __init__(self, input_dim, output_dim, mask_value=0.0):
         super().__init__()
@@ -60,7 +66,7 @@ if __name__=="__main__":
     X_tensor = torch.tensor(X, dtype=torch.float32)
     #Y_tensor = torch.tensor(Y, dtype=torch.float32)
     dataset = TensorDataset(X_tensor)
-    loader = DataLoader(dataset, batch_size=32, shuffle=True)
+    loader = DataLoader(dataset, batch_size=128, shuffle=True)
     INPUT_DIM=X_tensor.shape[2]
     OUTPUT_DIM=12
     model = LSTMModel(input_dim=INPUT_DIM, output_dim=OUTPUT_DIM).to(device)
@@ -78,6 +84,7 @@ if __name__=="__main__":
             losses = []
             remainder = X[:, 0:1, 12:]     # shape (1,1,4)
             #predict each future step autoregressively
+            print("Live Loss: ...")
             for t in range(seq_len - 1):
                 out, hidden = model.lstm1(inp, hidden)   # (B,1,128)
                 out, hidden = model.lstm2(out, hidden)
@@ -100,5 +107,8 @@ if __name__=="__main__":
             loss.backward()
             optimizer.step()
             total_loss += loss.item()
+            clear_line_up()
+            print(f"Live Loss: {total_loss:.6f}")
+        avg_loss = total_loss / len(loader)
         print(f"Epoch {epoch+1:02d} | Loss: {avg_loss:.6f}")
         torch.save(model.state_dict(), "/its/home/drs25/Quadruped/Code/UBERMODEL/models/lstm_gait_autoregressive.pth")
