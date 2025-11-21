@@ -3,10 +3,16 @@ import random
 import numpy as np
 import torch
 import torch.nn as nn
-from torch.utils.data import Dataset, DataLoader, random_split
+from torch.utils.data import TensorDataset, DataLoader
 import matplotlib.pyplot as plt
 from dataclasses import dataclass
-
+import sys
+def clear_line_up():
+    # Move cursor up one line
+    sys.stdout.write("\033[1A")
+    # Clear that line
+    sys.stdout.write("\033[2K")
+    sys.stdout.flush()
 SEED = 42
 random.seed(SEED)
 np.random.seed(SEED)
@@ -89,61 +95,64 @@ class MotorTransformer(nn.Module):
         x = self.encoder(x)
         return self.output(x)      # (B, T, V)
 
-def evaluate(loader):
-    model.eval()
-    total_loss = 0.0
-    total_samples = 0
-    with torch.no_grad():
-        for xb, yb in loader:
-            xb = xb.to(device)
-            yb = yb.to(device)
-            pred = model(xb)
-            loss = criterion(pred, yb)
-            bs = xb.size(0)
-            total_loss += loss.item() * bs
-            total_samples += bs
-    return total_loss / total_samples
-class MotorDataset(Dataset):
-    def __init__(self, X, y):
-        self.X = X
-        self.y = y
-    def __len__(self):
-        return len(self.X)
-    def __getitem__(self, idx):
-        return self.X[idx], self.y[idx]
 
 if __name__=="__main__":
     #load in the data 
     N = 100     # number of sequences
     T = 200     # timesteps
-    
     V2 = 12      # joints
+    X=np.load("/its/home/drs25/Quadruped/Code/UBERMODEL/models/X_DATA.npy")[100:]
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    #X, y = generate_noisy_sine_dataset(N, T, V1,V2, noise_std=0.2)
-    X=torch.tensor(np.load("/its/home/drs25/Quadruped/Code/UBERMODEL/X_DATA.npy"),  dtype=torch.float32)[100:]
-    """X = np.concatenate([X[..., :15],      # first 15
-                    X[..., -1:],      # last value (keep dims)
-                   ], axis=-1)"""
+    X_tensor = torch.tensor(X, dtype=torch.float32)
     V1 = X.shape[2]      # joints
-    y=torch.tensor(np.load("/its/home/drs25/Quadruped/Code/UBERMODEL/y_DATA.npy"),  dtype=torch.float32)[100:]
-    print(X.shape,y.shape)
-    dataset = MotorDataset(X, y)
-    loader = DataLoader(dataset, batch_size=64, shuffle=True)
-    n_epochs = 500
+    dataset = TensorDataset(X_tensor)
+    loader = DataLoader(dataset, batch_size=128, shuffle=True)
+    n_epochs = 100
+    scheduler=np.arange(0,0.9,0.9/n_epochs)
     train_losses = []
     val_losses = []
     model = MotorTransformer(input_dim=V1,output_dim=V2,T=T).to(device)
-    opt = torch.optim.Adam(model.parameters(), lr=1e-3, weight_decay=1e-6)
-    loss_fn = nn.MSELoss()
+    criterion = nn.MSELoss()
+    optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
+    
     for epoch in range(n_epochs):
-        for xb, yb in loader:
-            pred = model(xb.to(device))
-            loss = loss_fn(pred, yb.to(device))
+        total_loss = 0.0
+        print("Live Loss: ...")
+        for (X,) in loader:     # X: (batch, seq_len, input_dim)
+            X = X.to(device)
+            optimizer.zero_grad()
+            seq_len=X.shape[1]
+            inp = X[:, 0].unsqueeze(1) 
+            hidden = None                   # LSTM hidden state
+            losses = []
+            #predict each future step autoregressively
+            window=10
+            inp = X[:, :window,:]
+            for t in range(window, seq_len):
+                # Forward pass
+                pred = model(inp)  # (batch,1,12)
 
-            opt.zero_grad()
+                # Compute target delta
+                target_delta = X[:, t-window+1:t+1, :12] - X[:, t-window:t, :12]
+                target_delta = target_delta.unsqueeze(1)  # (batch,1,12)
+                losses.append(criterion(pred, target_delta))
+
+                # Reconstruct absolute motor positions
+                motors = inp[:, :, :12] + pred
+                # Scheduled sampling
+                if np.random.random() < scheduler[epoch]:
+                    remainder = X[:, t-window+1:t+1, 12:]
+                    inp = torch.cat([motors.detach(), remainder.to(device)], dim=2)
+                else:
+                    inp = X[:, t-window+1:t+1, :]
+            loss = torch.stack(losses).mean()
             loss.backward()
-            opt.step()
-
-        print(f"Epoch {epoch+1} | Loss: {loss.item():.6f}")
-    torch.save(model.state_dict(), "/its/home/drs25/Quadruped/Code/UBERMODEL/models/gait_transformer.pth")
+            torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
+            optimizer.step()
+            total_loss += loss.item()
+            clear_line_up()
+            print(f"Live Loss: {total_loss:.6f}")
+        avg_loss = total_loss / len(loader)
+        print(f"Epoch {epoch+1:02d} | Loss: {avg_loss:.6f} | Probability:",scheduler[epoch])
+        torch.save(model.state_dict(), "/its/home/drs25/Quadruped/Code/UBERMODEL/models/transformer_gait_autoregressiveDeltas_window.pth")
     

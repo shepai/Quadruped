@@ -1,10 +1,11 @@
-from tensorflow.keras.models import load_model
-import tensorflow as tf
+import torch
+import torch.nn as nn
+from torch.utils.data import TensorDataset, DataLoader
 import matplotlib.pyplot as plt 
 import matplotlib
 import numpy as np
-from trainModel import generate_noisy_sine_dataset
-matplotlib.use('TkAgg')
+from PytorchLSTMTrain import *
+#matplotlib.use('TkAgg')
 
 def test_data(X):
     # Register the missing operation used by Masking()
@@ -34,27 +35,41 @@ def display_data(y, Pred, dt=0.1):
     plt.yticks(fontsize=12)
 
     plt.tight_layout()
-    plt.show()
+    plt.savefig("/its/home/drs25/Quadruped/Code/UBERMODEL/LSTM/example_lstm.pdf")
 
 if __name__=="__main__":
     #load in the data 
     #X, y = generate_noisy_sine_dataset(100, 200, 20, 12, noise_std=0.2)
-    X=np.load("/its/home/drs25/Quadruped/Code/UBERMODEL/X_DATA.npy")[0:100]
-    X = np.concatenate([X[..., :15],      # first 15
-                    X[..., -1:],      # last value (keep dims)
-                   ], axis=-1)
-    y=np.load("/its/home/drs25/Quadruped/Code/UBERMODEL/y_DATA.npy")[0:100]
-    recorded=[]
-    x=X[0:1,0:1]
-    for i in range(100):
-        pred=test_data(x)
-        recorded.append(pred.copy())
-        remainder = x[:, :, 12:] 
-        x = np.concatenate([pred, remainder], axis=2)
+    X=np.load("/its/home/drs25/Quadruped/Code/UBERMODEL/models/X_DATA.npy")[:100]
+    X=(X-np.min(X))/(np.max(X)-np.min(X))
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    X_tensor = torch.tensor(X, dtype=torch.float32)
+    INPUT_DIM=X_tensor.shape[2]
+    OUTPUT_DIM=12
+    model = LSTMModel(input_dim=INPUT_DIM, output_dim=OUTPUT_DIM).to(device)
+    model.load_state_dict(torch.load("/its/home/drs25/Quadruped/Code/UBERMODEL/models/lstm_gait_autoregressiveDeltas.pth"))
+    model.eval()
+    recorded = []
+    window=10
+    x = X_tensor[0:1, 0:window].to(device)  # shape (1,1,16)
+    TIME=100
+    
+    for i in range(window,TIME):
+        pred = model(x)          # (1,12)
+        #pred = pred.unsqueeze(2) # (1,1,12)
+        motors=X_tensor[0:1,i-window:i,:12].to(device)+pred
+        recorded.append(motors.cpu().detach().numpy())
 
-    recorded=np.array(recorded).reshape((1,100,12))
-    print(recorded.shape,y[0:1,].shape)
-    display_data(y[0:1,:], recorded[0:1,:99])
+        remainder = X_tensor[0:1, i-window:i, 12:].to(device) # should be (1,window,8)
+
+        # fix any extra accidental dims
+        remainder = remainder.reshape(1,window,8)
+        x = torch.cat([motors, remainder], dim=2)
+        x = x.reshape(1,window,20)    # keep clean shape
+
+    recorded = np.concatenate(recorded, axis=1)   # -> (1, TIME, 12)
+    print(recorded.shape)
+    display_data(X[0:1,:TIME,:12], recorded[0:1,:TIME-1])
 
 
 

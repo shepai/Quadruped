@@ -62,6 +62,7 @@ class LSTMModel(nn.Module):
 if __name__=="__main__":
     #load in datasets
     X=np.load("/its/home/drs25/Quadruped/Code/UBERMODEL/models/X_DATA.npy")[100:]
+    X=(X-np.min(X))/(np.max(X)-np.min(X))
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     X_tensor = torch.tensor(X, dtype=torch.float32)
     #Y_tensor = torch.tensor(Y, dtype=torch.float32)
@@ -70,45 +71,50 @@ if __name__=="__main__":
     INPUT_DIM=X_tensor.shape[2]
     OUTPUT_DIM=12
     model = LSTMModel(input_dim=INPUT_DIM, output_dim=OUTPUT_DIM).to(device)
-   
+    n_epochs=100
+    scheduler=np.arange(0,0.9,0.9/n_epochs)
     criterion = nn.MSELoss()
-    optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
-    for epoch in range(100):
+    optimizer = torch.optim.AdamW(model.parameters(), lr=1e-3)
+    for epoch in range(n_epochs):
         total_loss = 0.0
+        print("Live Loss: ...")
         for (X,) in loader:     # X: (batch, seq_len, input_dim)
             X = X.to(device)
             optimizer.zero_grad()
             seq_len=X.shape[1]
-            inp = X[:, 0].unsqueeze(1) 
+            
             hidden = None                   # LSTM hidden state
             losses = []
-            remainder = X[:, 0:1, 12:]     # shape (1,1,4)
             #predict each future step autoregressively
-            print("Live Loss: ...")
-            for t in range(seq_len - 1):
-                out, hidden = model.lstm1(inp, hidden)   # (B,1,128)
+            window=10
+            inp = X[:, :window,:]
+            for t in range(window, seq_len):
+                # Forward pass
+                out, hidden = model.lstm1(inp, hidden)
                 out, hidden = model.lstm2(out, hidden)
-                pred = model.out(model.relu(model.fc1(out)))  # (B,1,D)
+                pred = model.out(model.relu(model.fc1(out)))  # (batch,1,12)
 
-                # target is the NEXT real timestep
-                target = X[:, t+1,:12].unsqueeze(1)
+                # Compute target delta
+                target_delta = X[:, t-window+1:t+1, :12] - X[:, t-window:t, :12]
+                target_delta = target_delta.unsqueeze(1)  # (batch,1,12)
+                losses.append(criterion(pred, target_delta))
 
-                # loss on this step
-                losses.append(criterion(pred, target))
-
-                # FEED PREDICTION BACK IN
-                #print(pred.shape,remainder.shape)
-                if np.random.random()<0.3: #30%
-                    inp = torch.concatenate([pred.detach(),remainder.to(device)], axis=2)   # freeze gradients through the input
+                # Reconstruct absolute motor positions
+                motors = inp[:, :, :12] + pred
+                # Scheduled sampling
+                if np.random.random() < scheduler[epoch]:
+                    remainder = X[:, t-window+1:t+1, 12:]
+                    inp = torch.cat([motors.detach(), remainder.to(device)], dim=2)
                 else:
-                    inp = X[:,t+1].unsqueeze(1) 
-                    remainder = X[:, t+1:t+2, 12:]
+                    inp = X[:, t-window+1:t+1, :]
+
             loss = torch.stack(losses).mean()
             loss.backward()
+            torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
             optimizer.step()
             total_loss += loss.item()
             clear_line_up()
             print(f"Live Loss: {total_loss:.6f}")
         avg_loss = total_loss / len(loader)
-        print(f"Epoch {epoch+1:02d} | Loss: {avg_loss:.6f}")
-        torch.save(model.state_dict(), "/its/home/drs25/Quadruped/Code/UBERMODEL/models/lstm_gait_autoregressive.pth")
+        print(f"Epoch {epoch+1:02d} | Loss: {avg_loss:.6f} | Probability:",scheduler[epoch])
+        torch.save(model.state_dict(), "/its/home/drs25/Quadruped/Code/UBERMODEL/models/lstm_gait_autoregressiveDeltasWindow.pth")
