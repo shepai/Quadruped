@@ -13,10 +13,10 @@ def clear_line_up():
     # Clear that line
     sys.stdout.write("\033[2K")
     sys.stdout.flush()
-SEED = 42
+"""SEED = 42
 random.seed(SEED)
 np.random.seed(SEED)
-torch.manual_seed(SEED)
+torch.manual_seed(SEED)"""
 def generate_noisy_sine_dataset(N, T, V1,V2, noise_std=0.1):
     """
     N = number of sequences
@@ -101,13 +101,16 @@ if __name__=="__main__":
     N = 100     # number of sequences
     T = 200     # timesteps
     V2 = 12      # joints
-    X=np.load("/its/home/drs25/Quadruped/Code/UBERMODEL/models/X_DATA.npy")[100:]
+    X=np.load("/its/home/drs25/Quadruped/Code/UBERMODEL/X_DATA_one.npy")[0:1]
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    mean=np.mean(X)
+    std=np.std(X)
+    X = (X - mean) / std
     X_tensor = torch.tensor(X, dtype=torch.float32)
-    V1 = X.shape[2]      # joints
+    V1 = X[:1,:,:].shape[2]      # joints
     dataset = TensorDataset(X_tensor)
     loader = DataLoader(dataset, batch_size=128, shuffle=True)
-    n_epochs = 100
+    n_epochs = 1000
     scheduler=np.arange(0,0.9,0.9/n_epochs)
     train_losses = []
     val_losses = []
@@ -123,28 +126,25 @@ if __name__=="__main__":
             optimizer.zero_grad()
             seq_len=X.shape[1]
             inp = X[:, 0].unsqueeze(1) 
-            hidden = None                   # LSTM hidden state
+            hidden = None                   # LSTM hidden state v  
             losses = []
             #predict each future step autoregressively
-            window=10
+            window=15
             inp = X[:, :window,:]
             for t in range(window, seq_len):
                 # Forward pass
                 pred = model(inp)  # (batch,1,12)
-
-                # Compute target delta
-                target_delta = X[:, t-window+1:t+1, :12] - X[:, t-window:t, :12]
-                target_delta = target_delta.unsqueeze(1)  # (batch,1,12)
-                losses.append(criterion(pred, target_delta))
-
-                # Reconstruct absolute motor positions
-                motors = inp[:, :, :12] + pred
-                # Scheduled sampling
-                if np.random.random() < scheduler[epoch]:
+                target=X[:, t:t+1, :12] #just get the next key
+                #target_delta = X[:, t-window+1:t+1, :12] - X[:, t-window:t, :12]
+                #target_delta = target_delta.unsqueeze(1)  # (batch,1,12)
+                losses.append(criterion(pred[:,-1:,:], target))
+                motors = pred #inp[:, :, :12] + pred
+                #scheduled sampling though i have commented this out
+                if np.random.random() < scheduler[epoch] and False:
                     remainder = X[:, t-window+1:t+1, 12:]
                     inp = torch.cat([motors.detach(), remainder.to(device)], dim=2)
                 else:
-                    inp = X[:, t-window+1:t+1, :]
+                    remainder = X[:, t-window+1:t+1, :]
             loss = torch.stack(losses).mean()
             loss.backward()
             torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
@@ -154,5 +154,5 @@ if __name__=="__main__":
             print(f"Live Loss: {total_loss:.6f}")
         avg_loss = total_loss / len(loader)
         print(f"Epoch {epoch+1:02d} | Loss: {avg_loss:.6f} | Probability:",scheduler[epoch])
-        torch.save(model.state_dict(), "/its/home/drs25/Quadruped/Code/UBERMODEL/models/transformer_gait_autoregressiveDeltas_window.pth")
+        torch.save(model.state_dict(), "/its/home/drs25/Quadruped/Code/UBERMODEL/models/transformer_gait_one1.pth")
     
