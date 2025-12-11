@@ -1,0 +1,104 @@
+import numpy as np 
+import torch
+import torch.nn as nn
+from torch.utils.data import DataLoader, TensorDataset
+from sklearn.model_selection import train_test_split
+import matplotlib.pyplot as plt
+import matplotlib 
+matplotlib.use('TkAgg')
+#load in the data
+
+X=np.load("/its/home/drs25/Quadruped/Code/UBERMODEL/data/steady_y.npy")
+y=np.load("/its/home/drs25/Quadruped/Code/UBERMODEL/data/steady_X.npy")
+X = np.nan_to_num(X, nan=0.0, posinf=0.0, neginf=0.0)
+y = np.nan_to_num(y, nan=0.0, posinf=0.0, neginf=0.0)
+print("X has NaN:", np.isnan(X).any())
+print("y has NaN:", np.isnan(y).any())
+
+X_t = torch.tensor(X, dtype=torch.float32)
+y_t = torch.tensor(y, dtype=torch.float32).reshape((len(y),-1))
+X_train, X_val, y_train, y_val = train_test_split(
+    X_t, y_t, test_size=0.2, shuffle=True
+)
+print("X data",X.shape)
+print("y data",y.shape)
+#LSTM class
+
+class RegressiveLSTM(nn.Module):
+    def __init__(self, input_size=11, hidden_size=64, num_layers=2, output_size=60, dropout=0.1):
+        super(RegressiveLSTM, self).__init__()
+        
+        # LSTM for sequence processing
+        self.lstm = nn.LSTM(
+            input_size=input_size,
+            hidden_size=hidden_size,
+            num_layers=num_layers,
+            batch_first=True,
+            dropout=dropout if num_layers > 1 else 0
+        )
+        
+        # Fully connected layer to map final hidden state → output vector
+        self.fc = nn.Linear(hidden_size, output_size)
+
+    def forward(self, x):
+        """
+        x: [batch_size, seq_len, input_size]
+        """
+        lstm_out, (h_n, c_n) = self.lstm(x)
+        
+        # Use final hidden state from last layer
+        last_hidden = h_n[-1]   # shape: [batch_size, hidden_size]
+        
+        output = self.fc(last_hidden)
+        return output
+
+#train
+device="cuda" if torch.cuda.is_available() else "cpu"
+model = RegressiveLSTM(input_size=11, hidden_size=64, num_layers=2, output_size=60)
+batch = 32
+seq_len = 50  # example
+
+#test 
+model = RegressiveLSTM(input_size=11, hidden_size=64, num_layers=2, output_size=48)
+model.load_state_dict(torch.load("/its/home/drs25/Quadruped/Code/UBERMODEL/models/regressive_lstm.pth", map_location=device))
+model.eval()
+
+def reform(height, gap, width, level, start, repeat=1):
+    #rising/peak part sampled at integer indices
+    x1 = np.arange(start,start+gap)
+    y1 = height * np.sin((np.pi / gap) * (x1 - start))
+    x2 = np.arange(start+gap, start+gap+width)#flat base part
+    y2 = np.ones_like(x2) * level
+    x = np.concatenate((x1, x2))#one full cycle
+    y = np.concatenate((y1, y2))
+    cycles = []#repeat cycles exactly
+    ys = []
+    for i in range(repeat):
+        offset = i * (gap + width)
+        cycles.append(x + offset)
+        ys.append(y)
+    x = np.concatenate(cycles)
+    y = np.concatenate(ys)
+    # shift so first peak is at index "start"
+    peaks, _ = find_peaks(np.abs(y))
+    shift = peaks[0] - start #find difference between our generated signal
+    x-=start
+    y = np.roll(y, -shift) #roll it round so it alignes with the start position
+    return x, y
+
+idx = 0
+x_sample = X_t[idx]           # shape: [seq_len, 11]
+y_true = y_t[idx] 
+x_sample = x_sample.unsqueeze(0)
+model.eval()
+with torch.no_grad():
+    y_pred = model(x_sample.to(device))   
+y_pred = y_pred.squeeze(0)
+params_m1=y_true.unsqueeze(0)[0:5]
+params_m2=y_pred[0:5]
+x1,y1=reform(*params_m1)
+x2,y2=reform(*params_m2)
+
+plt.plot(x1,y1)
+plt.plot(x2,y2,"--")
+plt.show()
