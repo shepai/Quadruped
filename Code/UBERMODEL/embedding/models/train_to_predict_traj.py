@@ -34,6 +34,7 @@ class RegressiveLSTM(nn.Module):
         last_hidden = h_n[-1]   # shape: [batch_size, hidden_size]
         
         output = self.fc(last_hidden)
+        output = torch.clamp(output, -100, 100)
         return output
 if __name__=="__main__":
     X=np.load("/its/home/drs25/Quadruped/Code/UBERMODEL/data/steady_y.npy")
@@ -55,7 +56,7 @@ if __name__=="__main__":
     
     #LSTM class
     #train
-    model = RegressiveLSTM(input_size=11, hidden_size=64, num_layers=2, output_size=60)
+    model = RegressiveLSTM(input_size=11, hidden_size=64, num_layers=2, output_size=60,dropout=0.3)
     batch = 32
     seq_len = 50  # example
 
@@ -85,7 +86,7 @@ if __name__=="__main__":
 
         # Optimizer + Loss
         optimizer = torch.optim.Adam(model.parameters(), lr=lr)
-        loss_fn = torch.nn.MSELoss()
+        loss_fn = nn.SmoothL1Loss()
         losses=[]
         # Training loop
         for epoch in range(1, epochs + 1):
@@ -126,8 +127,8 @@ if __name__=="__main__":
             else:
                 print(f"Epoch {epoch:03d} | Train Loss: {epoch_loss:.4f}")
             losses.append([epoch_loss,val_loss])
-            np.save("/its/home/drs25/Quadruped/Code/UBERMODEL/models/regressive_lstm_loss",np.array(losses))
-            torch.save(model.state_dict(), "/its/home/drs25/Quadruped/Code/UBERMODEL/models/regressive_lstm_norm.pth")
+            np.save("/its/home/drs25/Quadruped/Code/UBERMODEL/models/regressive_lstm_loss_norm_0.3",np.array(losses))
+            torch.save(model.state_dict(), "/its/home/drs25/Quadruped/Code/UBERMODEL/models/regressive_lstm_norm_01.pth")
 
     train_model(
         model,
