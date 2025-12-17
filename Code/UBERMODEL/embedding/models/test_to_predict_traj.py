@@ -80,6 +80,10 @@ if __name__=="__main__":
     print("X has NaN:", np.isnan(X).any())
     print("y has NaN:", np.isnan(y).any())
     #normalise 
+    mean = X.mean(axis=1, keepdims=True)
+    std  = X.std(axis=1, keepdims=True) + 1e-8
+
+    X = (X - mean) / std
     scaler = StandardScaler()
     y = scaler.fit_transform(y)
 

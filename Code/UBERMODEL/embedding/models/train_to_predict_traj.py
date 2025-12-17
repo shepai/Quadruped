@@ -46,6 +46,10 @@ if __name__=="__main__":
     print("X data",X.shape)
     print("y data",y.shape)
     #normalise 
+    mean = X.mean(axis=1, keepdims=True)
+    std  = X.std(axis=1, keepdims=True) + 1e-8
+
+    X = (X - mean) / std
     scaler = StandardScaler()
     y = scaler.fit_transform(y)
     X_t = torch.tensor(X, dtype=torch.float32)
@@ -127,8 +131,8 @@ if __name__=="__main__":
             else:
                 print(f"Epoch {epoch:03d} | Train Loss: {epoch_loss:.4f}")
             losses.append([epoch_loss,val_loss])
-            np.save("/its/home/drs25/Quadruped/Code/UBERMODEL/models/regressive_lstm_loss_norm_0.3",np.array(losses))
-            torch.save(model.state_dict(), "/its/home/drs25/Quadruped/Code/UBERMODEL/models/regressive_lstm_norm_01.pth")
+            np.save("/its/home/drs25/Quadruped/Code/UBERMODEL/models/regressive_lstm_loss_norm_t3",np.array(losses))
+            torch.save(model.state_dict(), "/its/home/drs25/Quadruped/Code/UBERMODEL/models/regressive_lstm_norm_t3.pth")
 
     train_model(
         model,
