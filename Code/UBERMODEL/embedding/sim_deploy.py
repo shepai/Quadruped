@@ -19,8 +19,8 @@ matplotlib.use('TkAgg')
 ###################
 X=np.load("/its/home/drs25/Quadruped/Code/UBERMODEL/data/steady_y.npy")[0:1000]
 y=np.load("/its/home/drs25/Quadruped/Code/UBERMODEL/data/steady_X.npy")[0:1000]
-np.save("/its/home/drs25/Quadruped/Code/UBERMODEL/data/steady_y_lite.npy",X)
-np.save("/its/home/drs25/Quadruped/Code/UBERMODEL/data/steady_X_lite.npy",y)
+#np.save("/its/home/drs25/Quadruped/Code/UBERMODEL/data/steady_y_lite.npy",X)
+#np.save("/its/home/drs25/Quadruped/Code/UBERMODEL/data/steady_X_lite.npy",y)
 X = np.nan_to_num(X, nan=0.0, posinf=0.0, neginf=0.0)
 y = np.nan_to_num(y, nan=0.0, posinf=0.0, neginf=0.0).reshape((len(y),-1))
 mean = X.mean()
