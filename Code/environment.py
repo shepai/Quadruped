@@ -194,6 +194,8 @@ class environment:
                 
                 break
         return motor_positions
+    def get_pos_or(self):
+        return p.getBasePositionAndOrientation(self.robot_id)
     def stop(self):
         if self.recording and self.record:
             p.stopStateLogging(self.video_log_id)
