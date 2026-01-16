@@ -200,6 +200,7 @@ class CTRNNQuadruped:
         self.Kp_vel = 0.3  # Adjusts knee based on forward velocity
         self.height=1
         self.imu=imu
+        self.t=0
     def sigmoid(self, x):
         x = np.clip(x, -500, 500)
         return 1 / (1 + np.exp(-x))
@@ -235,7 +236,8 @@ class CTRNNQuadruped:
         other=np.array([[self.omega[i],self.omega[i],self.omega[i]] for i in range(len(self.omega))])
         # Compute motor commands (combine CTRNn output and oscillation)
 
-        motor_commands = np.sin(self.dt+np.concatenate([self.outputs[0:3]] * 4) + other.flatten())
+        motor_commands = np.sin(self.t+np.concatenate([self.outputs[0:3]] * 4) + other.flatten())
+        self.t+=self.dt
         return motor_commands*self.height  # Return motor positions (normalized)
     def set_genotype(self, values):
         """Set CTRNN parameters from an evolutionary genotype."""
@@ -254,6 +256,7 @@ class CTRNNQuadruped:
         self.weights = np.clip(self.weights, -4, 4)  # Cap weight values
         self.omega = np.clip(self.omega, -1, 1)  # Cap weight values
         self.geno=np.concatenate([self.weights.flatten(),self.biases.flatten(),self.tau.flatten(),self.omega.flatten()])
+        self.t=0
     def mutate(self,rate=0.2):
         probailities=np.random.random(self.geno.shape)
         self.geno[np.where(probailities<rate)]+=np.random.normal(0,4,self.geno[np.where(probailities<rate)].shape)
