@@ -27,4 +27,5 @@ robot_id = p.loadURDF(path+"Quadruped_prestip.urdf",flags=flags)
 The press tip is a tactile sensor. This does not work in simulation but provides a hard outside. 
 <img width=30% src="https://github.com/shepai/Quadruped/blob/main/assets/presstip.png?raw=true">
 
-<img width=30% src="https://github.com/shepai/Quadruped/blob/main/assets/videos/example.gif">
+
+<img width=70% src="https://github.com/shepai/Quadruped/blob/main/assets/videos/example.gif">
